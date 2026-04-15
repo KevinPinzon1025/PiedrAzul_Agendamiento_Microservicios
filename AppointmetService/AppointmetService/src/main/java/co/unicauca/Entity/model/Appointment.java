@@ -1,6 +1,7 @@
 package co.unicauca.Entity.model;
 
 
+import co.unicauca.Entity.decorator.AppointmetDecorator;
 import co.unicauca.Entity.state.AppointmentState;
 import co.unicauca.Entity.state.CreatedAppointment;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Appointment {
+public class Appointment implements AppointmetDecorator {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long idAppointment;
@@ -80,4 +81,8 @@ public class Appointment {
         state.markExpired();
     }
 
+    @Override
+    public String obtainObservation() {
+        return this.observation;
+    }
 }
