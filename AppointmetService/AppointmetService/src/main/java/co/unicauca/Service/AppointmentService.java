@@ -61,7 +61,9 @@ public class AppointmentService {
         if (!repository.existsById(id)) {
             return false;
         }
-        repository.deleteById(id);
+        Appointment appointment = repository.findById(id).get();
+        appointment.cancell();
+        //repository.deleteById(id);
         return true;
     }
 
