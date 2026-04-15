@@ -1,5 +1,6 @@
 package co.unicauca.Controller;
 
+import co.unicauca.Entity.facade.AppointmentFacade;
 import co.unicauca.Entity.model.Appointment;
 import co.unicauca.Service.AppointmentService;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +15,14 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final AppointmentFacade appointmentFacade;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    //public AppointmentController(AppointmentService appointmentService) {
+    //    this.appointmentService = appointmentService;
+    //}
+
+    public AppointmentController(AppointmentFacade appointmentFacade, AppointmentService appointmentService) {
+        this.appointmentFacade = appointmentFacade;
         this.appointmentService = appointmentService;
     }
 
@@ -24,9 +31,24 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.findAll());
     }
 
-    @PostMapping
+    /*@PostMapping
     public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
         Appointment created = appointmentService.createManualAppointment(appointment);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.getIdAppointment())
+                .toUri();
+
+        return ResponseEntity.created(location).body(created);
+    }
+
+    */
+
+    @PostMapping
+    public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
+        Appointment created = appointmentFacade.createAppointment(appointment);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

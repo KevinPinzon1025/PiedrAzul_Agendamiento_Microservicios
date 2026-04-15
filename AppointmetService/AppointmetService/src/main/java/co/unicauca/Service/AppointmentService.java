@@ -65,4 +65,9 @@ public class AppointmentService {
         return true;
     }
 
+    @Transactional
+    public Appointment save(Appointment appointment){
+        return repository.save(appointment);
+    }
+
 }
