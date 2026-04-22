@@ -7,9 +7,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * Servicio de notificaciones.
- * En producción invocaría un proveedor real (SendGrid, Twilio, Firebase, etc.).
- * En el taller simula el envío con logger.info en el formato requerido:
- *   "de: sistema, para: paciente/profesional, asunto: ..., body: ..."
  */
 @Service
 public class NotificationService {

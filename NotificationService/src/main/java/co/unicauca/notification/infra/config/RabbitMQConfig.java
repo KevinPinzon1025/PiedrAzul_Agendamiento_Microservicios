@@ -7,15 +7,6 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Configuración RabbitMQ del consumidor.
- * Patrón idéntico al de booking-microservice en BookingGym-Async:
- *   - misma cola durable
- *   - Jackson2JsonMessageConverter para deserializar el JSON al DTO
- *
- * La cola DEBE declararse aquí también: si NotificationService arranca
- * antes que AppointmetService, RabbitMQ la crea y los mensajes no se pierden.
- */
 @Configuration
 public class RabbitMQConfig {
 

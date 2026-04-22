@@ -8,16 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
-/**
- * Consumidor RabbitMQ para el evento AppointmentCreated.
- *
- * Patrón idéntico a UserConsumerService en BookingGym-Async:
- *   @RabbitListener(queues = RabbitMQConfig.USER_QUEUE)
- *   public void receiveMessage(User user) { ... }
- *
- * Aquí escuchamos la cola "appointment.created.queue" y delegamos
- * a NotificationService para enviar log al paciente y al profesional.
- */
 @Component
 public class AppointmentCreatedListener {
 
@@ -38,10 +28,9 @@ public class AppointmentCreatedListener {
             notificationService.notifyProfessional(event);
             logger.info("[LISTENER] Notificaciones procesadas OK para citaId={}", event.getIdAppointment());
         } catch (Exception e) {
-            // En producción: DLQ (Dead Letter Queue) para reintentos automáticos.
             logger.error("[LISTENER] Error procesando notificación para citaId={}. Error: {}",
                     event.getIdAppointment(), e.getMessage());
-            throw e; // re-lanzar para que RabbitMQ gestione el nack/requeue
+            throw e;
         }
     }
 }

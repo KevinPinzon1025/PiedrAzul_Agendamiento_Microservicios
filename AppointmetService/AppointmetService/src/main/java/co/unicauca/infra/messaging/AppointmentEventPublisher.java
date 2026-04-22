@@ -7,16 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Publicador de eventos hacia RabbitMQ.
- * Patrón idéntico a UserService.createUser() en information-microservice
- * de BookingGym-Async, que llama:
- *   rabbitTemplate.convertAndSend(RabbitMQConfig.USER_QUEUE, userSaved);
- *
- * Aquí lo encapsulamos en un componente dedicado para respetar
- * el principio de responsabilidad única y no mezclar lógica de mensajería
- * dentro del Facade.
- */
 @Component
 public class AppointmentEventPublisher {
 
@@ -28,12 +18,6 @@ public class AppointmentEventPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    /**
-     * Publica el evento de cita creada en RabbitMQ.
-     * Se invoca SIEMPRE después de que appointmentRepository.save() fue exitoso.
-     *
-     * @param event datos de la cita recién persistida
-     */
     public void publish(AppointmentCreatedEvent event) {
         try {
             rabbitTemplate.convertAndSend(

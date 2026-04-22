@@ -5,10 +5,10 @@ import co.unicauca.Entity.scheduling.ManualSchedule;
 import co.unicauca.Entity.state.AppointmentState;
 import co.unicauca.Entity.state.CreatedAppointment;
 import co.unicauca.Service.AppointmentService;
-import co.unicauca.infra.event.AppointmentCreatedEvent;        // NUEVO
-import co.unicauca.infra.messaging.AppointmentEventPublisher;  // NUEVO
-import org.slf4j.Logger;                                        // NUEVO
-import org.slf4j.LoggerFactory;                                 // NUEVO
+import co.unicauca.infra.event.AppointmentCreatedEvent;        
+import co.unicauca.infra.messaging.AppointmentEventPublisher;  
+import org.slf4j.Logger;                                       
+import org.slf4j.LoggerFactory;                                
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ public class AppointmentFacade {
     private AppointmentService appointmentService;
 
     @Autowired
-    private AppointmentEventPublisher eventPublisher;  // NUEVO
+    private AppointmentEventPublisher eventPublisher; 
 
     public AppointmentFacade(AppointmentService appointmentService,
                              AppointmentEventPublisher eventPublisher) {

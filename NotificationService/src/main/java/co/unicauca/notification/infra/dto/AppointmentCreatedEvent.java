@@ -5,18 +5,13 @@ import java.time.LocalDateTime;
 
 /**
  * Espejo del evento publicado por AppointmetService.
- * Se ubica en infra/dto/ igual que UserRequest en information-microservice
- * de BookingGym-Async.
- *
- * @JsonIgnoreProperties(ignoreUnknown = true) protege si AppointmetService
- * añade campos nuevos en el futuro — el consumidor no rompe.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentCreatedEvent {
 
     private long idAppointment;
     private LocalDateTime schedulingDate;
-    private LocalDateTime appointmenDate;  // typo original de la entidad, respetado
+    private LocalDateTime appointmenDate;
     private String observation;
     private long scheduler;
     private long patient;

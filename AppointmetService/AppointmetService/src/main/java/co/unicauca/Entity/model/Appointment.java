@@ -52,7 +52,7 @@ public class Appointment implements AppointmetDecorator {
     @PostPersist
     public void initState() {
         if (this.state == null) {
-            this.state = new CreatedAppointment(); // usa tu estado inicial
+            this.state = new CreatedAppointment();
             this.state.setContext(this);
         }
     }
@@ -62,7 +62,6 @@ public class Appointment implements AppointmetDecorator {
         this.state.setContext(this);
     }
 
-    //metodos
     public void cancell(){
         state.cancell();
     }
