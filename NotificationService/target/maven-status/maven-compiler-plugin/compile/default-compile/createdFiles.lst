@@ -1,0 +1,5 @@
+co\unicauca\notification\infra\dto\AppointmentCreatedEvent.class
+co\unicauca\notification\infra\config\RabbitMQConfig.class
+co\unicauca\notification\main\NotificationServiceApplication.class
+co\unicauca\notification\listener\AppointmentCreatedListener.class
+co\unicauca\notification\service\NotificationService.class

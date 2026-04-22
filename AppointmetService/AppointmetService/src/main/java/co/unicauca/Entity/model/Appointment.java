@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
@@ -44,6 +45,7 @@ public class Appointment implements AppointmetDecorator {
 
     //@Column(name = "appointment_state", nullable = false)
     @Transient
+    @JsonIgnore
     private AppointmentState state;
 
     @PostLoad

@@ -17,10 +17,6 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final AppointmentFacade appointmentFacade;
 
-    //public AppointmentController(AppointmentService appointmentService) {
-    //    this.appointmentService = appointmentService;
-    //}
-
     public AppointmentController(AppointmentFacade appointmentFacade, AppointmentService appointmentService) {
         this.appointmentFacade = appointmentFacade;
         this.appointmentService = appointmentService;

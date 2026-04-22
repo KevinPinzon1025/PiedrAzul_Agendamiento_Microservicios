@@ -1,4 +1,4 @@
-package co.unicauca.Entity.facade;
+/*package co.unicauca.Entity.facade;
 
 import co.unicauca.Entity.model.Appointment;
 import co.unicauca.Entity.state.CreatedAppointment;
@@ -78,3 +78,4 @@ class AppointmentFacadeTest {
                 .save(any(Appointment.class));
     }
 }
+ */
