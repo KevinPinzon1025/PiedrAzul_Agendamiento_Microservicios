@@ -22,7 +22,7 @@ public class SelfSchedule extends AppointmentScheduler {
 
     @Override
     protected void assignProfessional(Appointment appointment) {
-        if (appointment.getProfessional() == 0) {
+        if (appointment.getProfessional() == null) {
             throw new IllegalStateException("Debe seleccionar un profesional");
         }
     }

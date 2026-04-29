@@ -19,7 +19,7 @@ public class ManualSchedule extends AppointmentScheduler {
     @Override
     protected void assignProfessional(Appointment appointment) {
         //validacion sencilla, en Manual ya debe venir asignado un profesional
-        if (appointment.getProfessional() == 0) {
+        if (appointment.getProfessional() == null) {
             throw new IllegalStateException("Debe seleccionar un profesional");
         }
     }
