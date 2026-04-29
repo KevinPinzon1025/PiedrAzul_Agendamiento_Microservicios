@@ -33,14 +33,17 @@ public class Appointment implements AppointmetDecorator {
     @Column(name = "observation", nullable = false, length = 255)
     private String observation;
 
-    @Column(name = "scheduler_id")
-    private long scheduler;
+    @ManyToOne
+    @JoinColumn(name = "scheduler_id")
+    private Scheduler scheduler;
 
-    @Column(name = "patient_id", nullable = false)
-    private long patient;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
-    @Column(name = "professional_id", nullable = false)
-    private long professional;
+    @ManyToOne
+    @JoinColumn(name = "professional_id")
+    private Professional professional;
     //patron state
 
     //@Column(name = "appointment_state", nullable = false)

@@ -47,9 +47,9 @@ public class AppointmentFacade {
                 saved.getSchedulingDate(),
                 saved.getAppointmenDate(),
                 saved.getObservation(),
-                saved.getScheduler(),
-                saved.getPatient(),
-                saved.getProfessional()
+                saved.getScheduler().getId(),
+                saved.getPatient().getId(),
+                saved.getProfessional().getId()
         );
         eventPublisher.publish(event);
 
