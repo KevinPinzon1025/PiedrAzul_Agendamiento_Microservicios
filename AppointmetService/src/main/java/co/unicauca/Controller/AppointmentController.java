@@ -19,11 +19,13 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
+    //Lista todas las citas registradas.
     @GetMapping
     public ResponseEntity<List<Appointment>> listAll() {
         return ResponseEntity.ok(appointmentService.findAll());
     }
 
+    //Crea una nueva cita médica.
     @PostMapping
     public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
         Appointment created = appointmentService.createManualAppointment(appointment);
@@ -37,6 +39,7 @@ public class AppointmentController {
         return ResponseEntity.created(location).body(created);
     }
 
+    //Cancela una cita existente.
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> cancel(@PathVariable("id") long id) {
         boolean cancelled = appointmentService.cancelById(id);
