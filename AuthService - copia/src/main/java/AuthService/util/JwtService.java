@@ -1,6 +1,6 @@
 package AuthService.util;
 
-import AuthService.entity.User;
+import AuthService.entity.UserCredential;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
