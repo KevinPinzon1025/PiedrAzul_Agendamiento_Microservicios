@@ -19,7 +19,10 @@ public class SecurityConfig {
                     "/api/auth/register",
                     "/api/auth/login",
                     "/api/auth/validate",
-                    "/h2-console/**"
+                    "/h2-console/**",
+                    "/users/**",
+                    "/agendadores/**",
+                    "/administradores/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

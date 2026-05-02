@@ -1,5 +1,6 @@
 package AuthService.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -26,9 +27,11 @@ public class User {
     @Column(nullable = false, unique = true, length = 80)
     private String login;
 
+    @JsonIgnore
     @Column(nullable = false, name = "password_hash", length = 512)
     private String passwordHash;
 
+    @JsonIgnore
     @Column(nullable = false, name = "password_salt", length = 255)
     private String passwordSalt;
 
