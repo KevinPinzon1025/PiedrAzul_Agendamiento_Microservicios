@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,9 +32,20 @@ public class AppointmentService {
         return repository.findById(id);
     }
 
-    public List<Appointment> findByProfessionalAndDate(String professional, LocalDate date) {
-        //return repository.findByProfessionalAndDate(professional, date);
-        return null;
+    public List<Appointment> findByProfessionalAndDate(
+            String professional,
+            LocalDate date
+    ) {
+
+        LocalDateTime start = date.atStartOfDay();
+
+        LocalDateTime end = date.atTime(23, 59, 59);
+
+        return repository.findByProfessionalAndDate(
+                professional,
+                start,
+                end
+        );
     }
 
     public Appointment findByPatientAndDate(long patient, LocalDate date) {

@@ -25,7 +25,7 @@ public class DataLoader implements CommandLineRunner {
     @Autowired
     private ISchedulerRepository schedulerRepository;
     @Autowired
-    IPatientRepository patientRepository;
+    private IPatientRepository patientRepository;
 
    @Override
    public void run(String... args) throws Exception {
