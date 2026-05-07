@@ -19,13 +19,11 @@ import java.util.List;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
-    private final ProfessionalService professionalService;
     private final AppointmentFacade appointmentFacade;
 
-    public AppointmentController(AppointmentFacade appointmentFacade, AppointmentService appointmentService, ProfessionalService professionalService) {
+    public AppointmentController(AppointmentFacade appointmentFacade, AppointmentService appointmentService) {
         this.appointmentFacade = appointmentFacade;
         this.appointmentService = appointmentService;
-        this.professionalService = professionalService;
     }
 
     @GetMapping("/appointments")
@@ -46,23 +44,6 @@ public class AppointmentController {
                 )
         );
     }
-
-    @GetMapping("/professionals")
-    public ResponseEntity<List<Professional>> listAllProfessionals() {return ResponseEntity.ok(professionalService.findAll());}
-    /*@PostMapping
-    public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
-        Appointment created = appointmentService.createManualAppointment(appointment);
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(created.getIdAppointment())
-                .toUri();
-
-        return ResponseEntity.created(location).body(created);
-    }
-
-    */
 
     @PostMapping
     public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
