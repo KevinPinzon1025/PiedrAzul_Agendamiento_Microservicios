@@ -18,8 +18,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/register",
                     "/api/auth/login",
-                    "/api/auth/validate",
-                    "/h2-console/**"
+                    "/api/auth/validate"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

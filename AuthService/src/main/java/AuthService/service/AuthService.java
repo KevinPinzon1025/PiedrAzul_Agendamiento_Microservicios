@@ -4,9 +4,11 @@ import AuthService.dto.AuthResponse;
 import AuthService.dto.LoginRequest;
 import AuthService.dto.RegisterRequest;
 import AuthService.dto.TokenValidationResponse;
+import AuthService.dto.UserCreatedEvent;
 import AuthService.dto.UserResponse;
 import AuthService.entity.UserCredential;
 import AuthService.repository.UserCredentialRepository;
+import AuthService.messaging.AuthEventPublisher;
 import AuthService.util.JwtService;
 import AuthService.util.PasswordHasher;
 import AuthService.util.PasswordPolicy;
@@ -16,12 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserCredentialRepository repository;
     private final JwtService jwtService;
+    private final AuthEventPublisher authEventPublisher;
 
     public UserResponse register(RegisterRequest request) {
         if (!PasswordPolicy.isValid(request.getPassword())) {
@@ -44,6 +49,8 @@ public class AuthService {
                 .firstLastName(request.getFirstLastName())
                 .role(request.getRole())
                 .build());
+
+        authEventPublisher.publishUserCreated(mapToUserCreatedEvent(saved));
 
         return mapToResponse(saved);
     }
@@ -80,6 +87,19 @@ public class AuthService {
                 .valid(true)
                 .login(claims.getSubject())
                 .role(String.valueOf(claims.get("role")))
+                .build();
+    }
+
+    private UserCreatedEvent mapToUserCreatedEvent(UserCredential user) {
+        return UserCreatedEvent.builder()
+                .eventType("USER_CREATED")
+                .id(user.getId())
+                .login(user.getLogin())
+                .firstName(user.getFirstName())
+                .firstLastName(user.getFirstLastName())
+                .role(user.getRole())
+                .active(user.isActive())
+                .occurredAt(LocalDateTime.now())
                 .build();
     }
 
