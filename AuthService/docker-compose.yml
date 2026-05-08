@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: auth-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  auth_postgres_data:
