@@ -5,6 +5,7 @@ import co.unicauca.Entity.model.Appointment;
 import co.unicauca.Entity.model.Professional;
 import co.unicauca.Service.AppointmentService;
 import co.unicauca.Service.ProfessionalService;
+import co.unicauca.infra.dto.CreateAppointmentRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -45,9 +46,26 @@ public class AppointmentController {
         );
     }
 
-    @PostMapping
+  /*  @PostMapping
     public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
         Appointment created = appointmentFacade.createAppointment(appointment);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.getIdAppointment())
+                .toUri();
+
+        return ResponseEntity.created(location).body(created);
+    }
+*/
+
+    @PostMapping
+    public ResponseEntity<Appointment> create(
+            @RequestBody CreateAppointmentRequestDTO request
+    ) {
+
+        Appointment created = appointmentFacade.createAppointment(request);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

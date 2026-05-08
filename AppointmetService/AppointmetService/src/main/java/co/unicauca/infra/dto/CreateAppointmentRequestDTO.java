@@ -1,9 +1,8 @@
-package co.unicauca.frontend.dto;
+package co.unicauca.infra.dto;
 
 import java.time.LocalDateTime;
 
 public class CreateAppointmentRequestDTO {
-
     private Long patientId;
     private Long professionalId;
     private Long schedulerId;

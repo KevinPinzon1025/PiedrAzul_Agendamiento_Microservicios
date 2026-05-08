@@ -13,6 +13,7 @@ public class Frontend {
 
 /*
 TODO
+    -la cita se registra pero, donde esta registrando la hora? habra que modificar eso cuando se carguen los slots de los medicos
     - Endpoint para obtener horarios disponibles de los medicos
     en el CONTROLLER DEL BACKEND:
         @GetMapping("/available-hours")
@@ -25,6 +26,5 @@ TODO
         String professional,
         LocalDate date
         )
-    - modificar el post en el backend para recibir el CreateAppointmentRequestDTO y luego mappear a appointment
-        -DTO equivalente en el backend para CreateAppointmentRequest
+     -En el backend configurar el DTO que recibe para gestionar agendador y recibir si es una cita manual o una cita autonoma
  */

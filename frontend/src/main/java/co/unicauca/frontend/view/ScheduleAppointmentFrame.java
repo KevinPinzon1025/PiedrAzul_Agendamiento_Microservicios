@@ -1,6 +1,7 @@
 package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.client.AppointmentHttpClient;
+import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -31,7 +32,7 @@ public class ScheduleAppointmentFrame extends Application {
 
         this.stage = stage;
 
-        // ✅ Cliente HTTP REST
+        // Cliente HTTP REST
         this.httpClient = new AppointmentHttpClient();
 
         BorderPane root = new BorderPane();
@@ -344,9 +345,65 @@ public class ScheduleAppointmentFrame extends Application {
                         "-fx-background-radius: 8;"
         );
 
-        // TODO: conectar POST luego
         btnRegister.setOnAction(e -> {
-            lblFeedback.setText("Registro pendiente");
+
+            try {
+
+                String patientName = cbPatient.getValue();
+                String professionalName = cbProfessional.getValue();
+
+                LocalDate date = datePicker.getValue();
+
+                String observation = txtMotivo.getText();
+
+                if (patientName == null ||
+                        professionalName == null ||
+                        date == null ||
+                        observation == null ||
+                        observation.isBlank()) {
+
+                    lblFeedback.setText(
+                            "Complete todos los campos"
+                    );
+
+                    return;
+                }
+
+                // Obtener IDs reales desde nombres
+                Long patientId = httpClient.getPatientIdByName(patientName);
+
+                Long professionalId = httpClient.getProfessionalIdByName(professionalName);
+
+                CreateAppointmentRequestDTO request =
+                        new CreateAppointmentRequestDTO();
+
+                request.setPatientId(patientId);
+
+                request.setProfessionalId(professionalId);
+
+                request.setObservation(observation);
+
+                // temporal mientras conectamos horarios
+                request.setAppointmentDate(
+                        date.atTime(10, 0)
+                );
+
+                httpClient.createAppointment(request);
+
+                lblFeedback.setText(
+                        "Cita registrada correctamente"
+                );
+
+                clearForm();
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+
+                lblFeedback.setText(
+                        "Error registrando cita"
+                );
+            }
         });
 
         Button btnClear = new Button("Limpiar");

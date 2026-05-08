@@ -9,7 +9,7 @@ public class AppointmentCreatedEvent implements Serializable {
     private LocalDateTime schedulingDate;
     private LocalDateTime appointmenDate;
     private String observation;
-    private long scheduler;
+    private Long scheduler;
     private long patient;
     private long professional;
 
@@ -19,7 +19,7 @@ public class AppointmentCreatedEvent implements Serializable {
                                    LocalDateTime schedulingDate,
                                    LocalDateTime appointmenDate,
                                    String observation,
-                                   long scheduler,
+                                   Long scheduler,
                                    long patient,
                                    long professional) {
         this.idAppointment  = idAppointment;
@@ -43,8 +43,8 @@ public class AppointmentCreatedEvent implements Serializable {
     public String getObservation() { return observation; }
     public void setObservation(String v) { this.observation = v; }
 
-    public long getScheduler() { return scheduler; }
-    public void setScheduler(long v) { this.scheduler = v; }
+    public Long getScheduler() { return scheduler; }
+    public void setScheduler(Long v) { this.scheduler = v; }
 
     public long getPatient() { return patient; }
     public void setPatient(long v) { this.patient = v; }

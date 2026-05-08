@@ -1,16 +1,26 @@
 package co.unicauca.Entity.facade;
 
 import co.unicauca.Entity.model.Appointment;
+import co.unicauca.Entity.model.Patient;
+import co.unicauca.Entity.model.Professional;
+import co.unicauca.Entity.model.Scheduler;
 import co.unicauca.Entity.scheduling.ManualSchedule;
 import co.unicauca.Entity.state.AppointmentState;
 import co.unicauca.Entity.state.CreatedAppointment;
 import co.unicauca.Service.AppointmentService;
-import co.unicauca.infra.event.AppointmentCreatedEvent;        
+import co.unicauca.Service.PatientService;
+import co.unicauca.Service.ProfessionalService;
+import co.unicauca.Service.SchedulerService;
+import co.unicauca.infra.dto.CreateAppointmentRequestDTO;
+import co.unicauca.infra.event.AppointmentCreatedEvent;
 import co.unicauca.infra.messaging.AppointmentEventPublisher;  
 import org.slf4j.Logger;                                       
 import org.slf4j.LoggerFactory;                                
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 public class AppointmentFacade {
@@ -21,6 +31,15 @@ public class AppointmentFacade {
     private AppointmentService appointmentService;
 
     @Autowired
+    private PatientService patientService;
+
+    @Autowired
+    private ProfessionalService professionalService;
+
+    @Autowired
+    private SchedulerService schedulerService;
+
+    @Autowired
     private AppointmentEventPublisher eventPublisher; 
 
     public AppointmentFacade(AppointmentService appointmentService,
@@ -29,25 +48,57 @@ public class AppointmentFacade {
         this.eventPublisher     = eventPublisher;
     }
 
-    public Appointment createAppointment(Appointment appointment) {
+    //nuevo facade TODO -> manejar el tipo de agendamiento, aqui esta por defecto como manual pero hay que mejorar eso
+    public Appointment createAppointment(CreateAppointmentRequestDTO request) {
 
+        //mapear profesional y paciente del dto a los objetos concretos de profesional y paciente
+        Patient patient = patientService.findById(request.getPatientId())
+                .orElseThrow(() ->
+                        new RuntimeException("Paciente no encontrado"));
+
+        Professional professional = professionalService.findById(request.getProfessionalId())
+                .orElseThrow(() ->
+                        new RuntimeException("Profesional no encontrado"));
+        Scheduler scheduler = Optional.ofNullable(request.getSchedulerId())
+                .flatMap(schedulerService::findById)
+                .orElse(null);
+
+
+        //instanciar una nueva cita
+        Appointment appointment = new Appointment();
+
+        //agregar estado inicial a la cita (patron state)
         appointment.initState();
         AppointmentState state = new CreatedAppointment();
         state.setContext(appointment);
 
-        ManualSchedule scheduler = new ManualSchedule();
-        scheduler.schedule(appointment);
-      
+        //configurar campos de la cita
+        appointment.setPatient(patient);
+        appointment.setProfessional(professional);
+        appointment.setObservation(request.getObservation());
+        appointment.setAppointmenDate(request.getAppointmentDate());
+        appointment.setSchedulingDate(LocalDateTime.now());
+        appointment.setScheduler(scheduler);
+
+        //agendar la cita mediante el template method
+        ManualSchedule manualSchedule = new ManualSchedule();
+        manualSchedule.schedule(appointment);
+
+        //guardar cita en base de datos
         Appointment saved = appointmentService.save(appointment);
         logger.info("[FACADE] Cita id={} guardada exitosamente en BD.", saved.getIdAppointment());
 
-       
+        //validacion de scheduler nulo antes de enviar el evento
+
+
+            //crear evento para publicar en rabitMQ
         AppointmentCreatedEvent event = new AppointmentCreatedEvent(
                 saved.getIdAppointment(),
                 saved.getSchedulingDate(),
                 saved.getAppointmenDate(),
                 saved.getObservation(),
-                saved.getScheduler().getId(),
+                saved.getScheduler()==null ?
+                        null : saved.getScheduler().getId(),
                 saved.getPatient().getId(),
                 saved.getProfessional().getId()
         );

@@ -3,6 +3,7 @@ package co.unicauca.frontend.client;
 
 
 import co.unicauca.frontend.dto.AppointmentDTO;
+import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
 import co.unicauca.frontend.dto.ProfessionalDTO;
 import co.unicauca.frontend.util.IAdapter;
 import co.unicauca.frontend.util.JsonUtil;
@@ -21,6 +22,11 @@ public class AppointmentHttpClient {
 
     private final String BASE_URL = "http://localhost:8080/appointment";
     private final HttpClient client = HttpClient.newHttpClient();
+
+    private List<PatientDTO> patientCache;
+
+    private List<ProfessionalDTO> professionalCache;
+
     private final IAdapter professionalAdapter =
             new ProfessionalAdapter();
     private final IAdapter patientAdapter =
@@ -65,6 +71,7 @@ public class AppointmentHttpClient {
     }
 
     public List<String> getAllProfessionals() {
+
         try {
 
             HttpRequest request = HttpRequest.newBuilder()
@@ -72,20 +79,39 @@ public class AppointmentHttpClient {
                     .GET()
                     .build();
 
-            HttpResponse<String> response =
-                    client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = client.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
 
-            List<ProfessionalDTO> professionals =
-                    JsonUtil.fromJsonList(
-                            response.body(),
-                            ProfessionalDTO.class
-                    );
+            professionalCache = JsonUtil.fromJsonList(
+                    response.body(),
+                    ProfessionalDTO.class
+            );
 
-            return (List<String>) professionalAdapter.adapt(professionals);
+            return (List<String>) professionalAdapter.adapt(professionalCache);
 
         } catch (Exception e) {
+
             throw new RuntimeException(e);
         }
+    }
+
+    public Long getProfessionalIdByName(String name) {
+
+        if (professionalCache == null) {
+
+            getAllProfessionals();
+        }
+
+        return professionalCache.stream()
+                .filter(p -> p.getProfName().equals(name))
+                .findFirst()
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Profesional no encontrado"
+                        ))
+                .getId();
     }
 
     public List<String> getAllPatients() {
@@ -93,25 +119,71 @@ public class AppointmentHttpClient {
         try {
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(BASE_URL+"/patients"))
+                    .uri(URI.create(BASE_URL + "/patients"))
                     .GET()
                     .build();
 
-            HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
-                    );
+            HttpResponse<String> response = client.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
 
-            List<PatientDTO> patients =
-                    JsonUtil.fromJsonList(
-                            response.body(),
-                            PatientDTO.class
-                    );
+            patientCache = JsonUtil.fromJsonList(
+                    response.body(),
+                    PatientDTO.class
+            );
 
-            return (List<String>) patientAdapter.adapt(patients);
+            return (List<String>) patientAdapter.adapt(patientCache);
 
         } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Long getPatientIdByName(String name) {
+
+        if (patientCache == null) {
+
+            getAllPatients();
+        }
+
+        return patientCache.stream()
+                .filter(p -> p.getPatName().equals(name))
+                .findFirst()
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Paciente no encontrado"
+                        ))
+                .getId();
+    }
+
+    public void createAppointment(CreateAppointmentRequestDTO request) {
+
+        try {
+
+            String json = JsonUtil.toJson(request);
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL ))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(
+                    httpRequest,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+
+            if (response.statusCode() != 201) {
+
+                throw new RuntimeException(
+                        "Error creando cita: " + response.body()
+                );
+            }
+
+        } catch (Exception e) {
+
             throw new RuntimeException(e);
         }
     }

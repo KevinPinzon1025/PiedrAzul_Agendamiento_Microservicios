@@ -25,4 +25,16 @@ public class JsonUtil {
             throw new RuntimeException(e);
         }
     }
+
+    public static String toJson(Object obj) {
+
+        try {
+
+            return mapper.writeValueAsString(obj);
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
 }
