@@ -9,6 +9,7 @@ public class CreateAppointmentRequestDTO {
     private Long schedulerId;
     private String observation;
     private LocalDateTime appointmentDate;
+    private SchedulingType schedulingType;
 
     public Long getPatientId() {
         return patientId;
@@ -49,4 +50,12 @@ public class CreateAppointmentRequestDTO {
     public void setSchedulerId(Long schedulerId) {
         this.schedulerId = schedulerId;
     }
+
+    public SchedulingType getSchedulingType() {
+        return schedulingType;
+    }
+    public void setSchedulingType(SchedulingType schedulingType) {
+        this.schedulingType = schedulingType;
+    }
+
 }

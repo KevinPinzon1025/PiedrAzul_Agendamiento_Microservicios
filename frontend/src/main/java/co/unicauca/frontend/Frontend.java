@@ -2,12 +2,14 @@
 package co.unicauca.frontend;
 
 import co.unicauca.frontend.view.SearchAppointmentFrame;
+import co.unicauca.frontend.view.SelfServiceAppointmentFrame;
 import javafx.application.Application;
 
 public class Frontend {
 
     public static void main(String[] args) {
-        Application.launch(SearchAppointmentFrame.class, args);
+       // Application.launch(SearchAppointmentFrame.class, args); //-> front de citas manuales
+        Application.launch(SelfServiceAppointmentFrame.class, args); //-> front de citas autonomas (en proceso aun)
     }
 }
 

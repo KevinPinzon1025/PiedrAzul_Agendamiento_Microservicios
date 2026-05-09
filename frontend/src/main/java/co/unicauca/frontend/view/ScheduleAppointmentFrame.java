@@ -2,6 +2,7 @@ package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.client.AppointmentHttpClient;
 import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
+import co.unicauca.frontend.dto.SchedulingType;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -374,16 +375,14 @@ public class ScheduleAppointmentFrame extends Application {
 
                 Long professionalId = httpClient.getProfessionalIdByName(professionalName);
 
-                CreateAppointmentRequestDTO request =
-                        new CreateAppointmentRequestDTO();
+                CreateAppointmentRequestDTO request = new CreateAppointmentRequestDTO();
 
                 request.setPatientId(patientId);
-
                 request.setProfessionalId(professionalId);
-
                 request.setObservation(observation);
+                request.setSchedulingType(SchedulingType.MANUAL);
 
-                // temporal mientras conectamos horarios
+                // TODO temporal mientras conectamos horarios
                 request.setAppointmentDate(
                         date.atTime(10, 0)
                 );
