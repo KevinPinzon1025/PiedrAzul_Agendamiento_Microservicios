@@ -1,10 +1,11 @@
 package co.unicauca.Entity.facade;
 
+import co.unicauca.Entity.factory.AppointmentSchedulerFactory;
 import co.unicauca.Entity.model.Appointment;
 import co.unicauca.Entity.model.Patient;
 import co.unicauca.Entity.model.Professional;
 import co.unicauca.Entity.model.Scheduler;
-import co.unicauca.Entity.scheduling.ManualSchedule;
+import co.unicauca.Entity.scheduling.AppointmentScheduler;
 import co.unicauca.Entity.state.AppointmentState;
 import co.unicauca.Entity.state.CreatedAppointment;
 import co.unicauca.Service.AppointmentService;
@@ -40,6 +41,9 @@ public class AppointmentFacade {
     private SchedulerService schedulerService;
 
     @Autowired
+    private AppointmentSchedulerFactory schedulingFactory;
+
+    @Autowired
     private AppointmentEventPublisher eventPublisher; 
 
     public AppointmentFacade(AppointmentService appointmentService,
@@ -48,7 +52,7 @@ public class AppointmentFacade {
         this.eventPublisher     = eventPublisher;
     }
 
-    //nuevo facade TODO -> manejar el tipo de agendamiento, aqui esta por defecto como manual pero hay que mejorar eso
+    //FACADE
     public Appointment createAppointment(CreateAppointmentRequestDTO request) {
 
         //mapear profesional y paciente del dto a los objetos concretos de profesional y paciente
@@ -81,17 +85,18 @@ public class AppointmentFacade {
         appointment.setScheduler(scheduler);
 
         //agendar la cita mediante el template method
-        ManualSchedule manualSchedule = new ManualSchedule();
-        manualSchedule.schedule(appointment);
+        AppointmentScheduler scheduling =
+                schedulingFactory.getScheduler(
+                        request.getSchedulingType()
+                );
+
+        scheduling.schedule(appointment);
 
         //guardar cita en base de datos
         Appointment saved = appointmentService.save(appointment);
         logger.info("[FACADE] Cita id={} guardada exitosamente en BD.", saved.getIdAppointment());
 
-        //validacion de scheduler nulo antes de enviar el evento
-
-
-            //crear evento para publicar en rabitMQ
+        //crear evento para publicar en rabitMQ
         AppointmentCreatedEvent event = new AppointmentCreatedEvent(
                 saved.getIdAppointment(),
                 saved.getSchedulingDate(),

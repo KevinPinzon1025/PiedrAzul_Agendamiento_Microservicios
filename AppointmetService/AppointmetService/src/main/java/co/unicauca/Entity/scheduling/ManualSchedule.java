@@ -1,10 +1,12 @@
 package co.unicauca.Entity.scheduling;
 
 import co.unicauca.Entity.model.Appointment;
+import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 
+@Component
 public class ManualSchedule extends AppointmentScheduler {
     @Override
     protected boolean checkAvailability(Appointment appointment) {
@@ -18,9 +20,9 @@ public class ManualSchedule extends AppointmentScheduler {
 
     @Override
     protected void assignProfessional(Appointment appointment) {
-        //validacion sencilla, en Manual ya debe venir asignado un profesional
-        if (appointment.getProfessional() == null) {
-            throw new IllegalStateException("Debe seleccionar un profesional");
+        //validacion de negocio, el agendamiento manual debe tener un agendador asociado
+        if (appointment.getScheduler() == null) {
+            throw new IllegalStateException("Error: El agendamiento manual debe contar con un agendador");
         }
     }
 
