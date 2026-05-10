@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -48,7 +49,13 @@ public class LoginFrame extends Application {
 
         root.getChildren().addAll(welcomePanel, loginCard);
 
-        Scene scene = new Scene(root, 1040, 700);
+        ScrollPane scrollPane = new ScrollPane(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setPannable(true);
+        scrollPane.setStyle("-fx-background-color: " + BACKGROUND + "; -fx-background: " + BACKGROUND + ";");
+
+        Scene scene = new Scene(scrollPane, 1040, 700);
         stage.setScene(scene);
         stage.setTitle("Inicio de sesión - Piedrazul");
         stage.show();
@@ -145,9 +152,9 @@ public class LoginFrame extends Application {
         styleInput(txtLogin);
         allowOnlyDigits(txtLogin, 15);
 
-        lblFeedback = new Label(" ");
+        lblFeedback = new Label();
         lblFeedback.setWrapText(true);
-        lblFeedback.setMinHeight(54);
+        lblFeedback.setMinHeight(Region.USE_PREF_SIZE);
         lblFeedback.setFont(Font.font("System", 16));
         lblFeedback.setStyle(
                 "-fx-text-fill: #8f1d1d;" +
@@ -155,6 +162,7 @@ public class LoginFrame extends Application {
                         "-fx-background-radius: 14;" +
                         "-fx-padding: 12;"
         );
+        hideFeedback();
 
         form.getChildren().addAll(lblLogin, txtLogin, lblFeedback);
         return form;
@@ -229,19 +237,32 @@ public class LoginFrame extends Application {
 
         String documentNumber = txtLogin.getText().trim();
         if (!documentNumber.matches("^[0-9]{6,15}$")) {
-            lblFeedback.setText("El número de identificación debe tener entre 6 y 15 dígitos.");
+            showFeedback("El número de identificación debe tener entre 6 y 15 dígitos.");
             return;
         }
 
+        hideFeedback();
         try {
 
 
             new SearchAppointmentFrame().start(new Stage());
             stage.close();
         } catch (Exception e) {
-            lblFeedback.setText("No fue posible iniciar sesión. Revise su número de identificación o verifique que AuthService esté disponible.");
+            showFeedback("No fue posible iniciar sesión. Verifique que el servicio correspondiente esté disponible.");
             showError(e.getMessage());
         }
+    }
+
+    private void showFeedback(String message) {
+        lblFeedback.setText(message);
+        lblFeedback.setVisible(true);
+        lblFeedback.setManaged(true);
+    }
+
+    private void hideFeedback() {
+        lblFeedback.setText("");
+        lblFeedback.setVisible(false);
+        lblFeedback.setManaged(false);
     }
 
     private void openRegister() {

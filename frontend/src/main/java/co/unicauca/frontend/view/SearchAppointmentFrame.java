@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -56,7 +57,7 @@ public class SearchAppointmentFrame extends Application {
         topContainer.getChildren().addAll(createHeader(), createToolbar());
 
         root.setTop(topContainer);
-        root.setCenter(createContent());
+        root.setCenter(createScrollableContent(createContent()));
 
         Scene scene = new Scene(root, 1240, 760);
         stage.setScene(scene);
@@ -64,6 +65,14 @@ public class SearchAppointmentFrame extends Application {
         stage.show();
 
         controller.onInit();
+    }
+
+    private Node createScrollableContent(Node content) {
+        ScrollPane scrollPane = new ScrollPane(content);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setStyle("-fx-background-color: #eef5fb; -fx-background: #eef5fb;");
+        return scrollPane;
     }
 
     private Node createHeader() {

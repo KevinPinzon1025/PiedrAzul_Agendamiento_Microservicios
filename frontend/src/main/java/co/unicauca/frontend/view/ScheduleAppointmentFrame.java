@@ -15,6 +15,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
@@ -54,12 +55,20 @@ public class ScheduleAppointmentFrame extends Application {
         topContainer.getChildren().addAll(createHeader(), createToolbar());
 
         root.setTop(topContainer);
-        root.setCenter(createForm());
+        root.setCenter(createScrollableContent(createForm()));
 
         Scene scene = new Scene(root, 1220, 780);
         stage.setScene(scene);
         stage.setTitle("Agendar cita");
         stage.show();
+    }
+
+    private Node createScrollableContent(Node content) {
+        ScrollPane scrollPane = new ScrollPane(content);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setStyle("-fx-background-color: #eef5fb; -fx-background: #eef5fb;");
+        return scrollPane;
     }
 
     private Node createHeader() {

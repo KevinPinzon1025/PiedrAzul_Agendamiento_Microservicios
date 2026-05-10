@@ -88,9 +88,11 @@ public class RegisterFrame extends Application {
         scrollPane.setFitToWidth(true);
         scrollPane.setPannable(true);
         scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+        scrollPane.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(scrollPane, javafx.scene.layout.Priority.ALWAYS);
         root.getChildren().add(scrollPane);
 
-        Scene scene = new Scene(root, 1040, 820);
+        Scene scene = new Scene(root, 1040, 760);
         stage.setScene(scene);
         stage.setTitle("Registro de paciente - Piedrazul");
         stage.show();
@@ -166,9 +168,9 @@ public class RegisterFrame extends Application {
         txtEmail.setPromptText("Opcional, ejemplo: correo@dominio.com");
         styleInput(txtEmail);
 
-        lblFeedback = new Label(" ");
+        lblFeedback = new Label();
         lblFeedback.setWrapText(true);
-        lblFeedback.setMinHeight(80);
+        lblFeedback.setMinHeight(Region.USE_PREF_SIZE);
         lblFeedback.setFont(Font.font("System", 16));
         lblFeedback.setStyle(
                 "-fx-text-fill: #8f1d1d;" +
@@ -176,6 +178,7 @@ public class RegisterFrame extends Application {
                         "-fx-background-radius: 14;" +
                         "-fx-padding: 12;"
         );
+        hideFeedback();
 
         form.add(createFieldLabel("Número de documento"), 0, 0);
         form.add(txtDocumentNumber, 1, 0);
@@ -216,12 +219,19 @@ public class RegisterFrame extends Application {
         );
         btnRegister.setOnAction(e -> register());
 
-        Hyperlink linkLogin = new Hyperlink("Ya tengo una cuenta");
-        linkLogin.setFont(Font.font("System", 18));
-        linkLogin.setStyle("-fx-text-fill: #215f98;");
-        linkLogin.setOnAction(e -> openLogin());
+        Button btnBackToLogin = new Button("Volver al login");
+        btnBackToLogin.setPrefWidth(320);
+        btnBackToLogin.setPrefHeight(44);
+        btnBackToLogin.setFont(Font.font("System", FontWeight.BOLD, 16));
+        btnBackToLogin.setStyle(
+                "-fx-background-color: #e8f1fb;" +
+                        "-fx-text-fill: #215f98;" +
+                        "-fx-background-radius: 14;" +
+                        "-fx-cursor: hand;"
+        );
+        btnBackToLogin.setOnAction(e -> openLogin());
 
-        actions.getChildren().addAll(btnRegister, linkLogin);
+        actions.getChildren().addAll(btnRegister, btnBackToLogin);
         return actions;
     }
 
@@ -299,9 +309,21 @@ public class RegisterFrame extends Application {
             alert.showAndWait();
             openLogin();
         } catch (Exception e) {
-            lblFeedback.setText("No se pudo registrar. Revise los datos y confirme que el documento no exista.");
+            showFeedback("No se pudo registrar. Revise los datos y confirme que el documento no exista.");
             showError(e.getMessage());
         }
+    }
+
+    private void showFeedback(String message) {
+        lblFeedback.setText(message);
+        lblFeedback.setVisible(true);
+        lblFeedback.setManaged(true);
+    }
+
+    private void hideFeedback() {
+        lblFeedback.setText("");
+        lblFeedback.setVisible(false);
+        lblFeedback.setManaged(false);
     }
 
     private List<String> validateForm() {
