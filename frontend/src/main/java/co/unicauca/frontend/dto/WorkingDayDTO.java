@@ -1,17 +1,11 @@
 package co.unicauca.frontend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class WorkingDayDTO {
 
     private DayOfWeek dayOfWeek;
@@ -21,4 +15,31 @@ public class WorkingDayDTO {
     private LocalTime endTime;
 
     private Integer appointmentDurationMinutes;
+
+    public DayOfWeek getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(DayOfWeek dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+    public Integer getAppointmentDurationMinutes() {
+        return appointmentDurationMinutes;
+    }
+    public void setAppointmentDurationMinutes(Integer appointmentDurationMinutes) {
+        this.appointmentDurationMinutes = appointmentDurationMinutes;
+    }
+
 }
