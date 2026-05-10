@@ -261,9 +261,12 @@ public class LoginFrame extends Application {
         Stage nextStage = new Stage();
         if ("PATIENT".equals(role)) {
             new SelfServiceAppointmentFrame().start(nextStage);
-        } else if ("ADMIN".equals(role) || "PROFESSIONAL".equals(role) || "SCHEDULER".equals(role)) {
+        } else if ("PROFESSIONAL".equals(role) || "SCHEDULER".equals(role)) {
             new ScheduleAppointmentFrame().start(nextStage);
-        } else {
+        }
+        else if("ADMIN".equals(role)){
+            new AdminAvailabilityFrame().start(nextStage);
+        }else {
             throw new IllegalStateException("Rol no reconocido: " + role);
         }
     }
