@@ -1,9 +1,9 @@
 package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.client.AuthHttpClient;
-//import co.unicauca.frontend.dto.AuthResponse;
-//import co.unicauca.frontend.dto.AuthSession;
-//import co.unicauca.frontend.dto.LoginRequest;
+import co.unicauca.frontend.dto.AuthResponse;
+import co.unicauca.frontend.dto.AuthSession;
+import co.unicauca.frontend.dto.LoginRequest;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -92,7 +92,7 @@ public class LoginFrame extends Application {
         subtitle.setStyle("-fx-text-fill: #edf6ff;");
 
         VBox tips = new VBox(12,
-                createTip("1. Ingrese su número de identificación."),
+                createTip("1. Ingrese su número de identificación o usuario interno."),
                 createTip("2. Si aún no tiene cuenta, use el botón 'Crear cuenta'."),
                 createTip("3. Después del ingreso podrá consultar o agendar citas.")
         );
@@ -146,11 +146,11 @@ public class LoginFrame extends Application {
         form.setAlignment(Pos.CENTER_LEFT);
         form.setPadding(new Insets(10, 0, 0, 0));
 
-        Label lblLogin = createFieldLabel("Número de identificación");
+        Label lblLogin = createFieldLabel("Número de identificación o usuario");
         txtLogin = new TextField();
-        txtLogin.setPromptText("Escriba su número de documento");
+        txtLogin.setPromptText("Paciente: documento. Personal: admin, medico o agendador");
         styleInput(txtLogin);
-        allowOnlyDigits(txtLogin, 15);
+        limitLength(txtLogin, 30);
 
         lblFeedback = new Label();
         lblFeedback.setWrapText(true);
@@ -221,35 +221,50 @@ public class LoginFrame extends Application {
         );
     }
 
-    private void allowOnlyDigits(TextField field, int maxLength) {
+    private void limitLength(TextField field, int maxLength) {
         field.textProperty().addListener((obs, oldValue, newValue) -> {
-            String filtered = newValue == null ? "" : newValue.replaceAll("[^0-9]", "");
-            if (filtered.length() > maxLength) {
-                filtered = filtered.substring(0, maxLength);
-            }
-            if (!filtered.equals(newValue)) {
-                field.setText(filtered);
+            if (newValue != null && newValue.length() > maxLength) {
+                field.setText(newValue.substring(0, maxLength));
             }
         });
     }
 
     private void login() {
 
-        String documentNumber = txtLogin.getText().trim();
-        if (!documentNumber.matches("^[0-9]{6,15}$")) {
-            showFeedback("El número de identificación debe tener entre 6 y 15 dígitos.");
+        String loginValue = txtLogin.getText().trim();
+        if (!loginValue.matches("^[A-Za-z0-9]{3,30}$")) {
+            showFeedback("Ingrese un número de identificación o usuario válido. Use solo letras y números.");
             return;
         }
 
         hideFeedback();
         try {
+            LoginRequest request = new LoginRequest();
+            request.setLogin(loginValue);
 
+            AuthResponse authResponse = authHttpClient.login(request);
+            AuthSession.setCurrentUser(authResponse);
 
-            new SearchAppointmentFrame().start(new Stage());
+            openHomeByRole(authResponse);
             stage.close();
         } catch (Exception e) {
-            showFeedback("No fue posible iniciar sesión. Verifique que el servicio correspondiente esté disponible.");
+            showFeedback("No fue posible iniciar sesión. Verifique que el servicio de autenticación esté disponible.");
             showError(e.getMessage());
+        }
+    }
+
+    private void openHomeByRole(AuthResponse authResponse) throws Exception {
+        String role = authResponse != null && authResponse.getRole() != null
+                ? authResponse.getRole().trim().toUpperCase()
+                : "";
+
+        Stage nextStage = new Stage();
+        if ("PATIENT".equals(role)) {
+            new SelfServiceAppointmentFrame().start(nextStage);
+        } else if ("ADMIN".equals(role) || "PROFESSIONAL".equals(role) || "SCHEDULER".equals(role)) {
+            new ScheduleAppointmentFrame().start(nextStage);
+        } else {
+            throw new IllegalStateException("Rol no reconocido: " + role);
         }
     }
 

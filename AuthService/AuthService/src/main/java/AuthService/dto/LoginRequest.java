@@ -9,8 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginRequest {
-    @NotBlank(message = "El número de identificación es obligatorio")
-    @Pattern(regexp = "^[0-9]{6,15}$", message = "El número de identificación debe tener entre 6 y 15 dígitos")
+    @NotBlank(message = "El usuario o número de identificación es obligatorio")
+    @Pattern(regexp = "^[A-Za-z0-9]{3,30}$", message = "El usuario debe tener entre 3 y 30 caracteres y solo puede contener letras o números")
     @JsonAlias({ "documentNumber" })
     private String login;
 

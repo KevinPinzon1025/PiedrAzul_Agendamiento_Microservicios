@@ -52,10 +52,37 @@ public class AuthResponse {
     }
 
     public String getFullName() {
-        return fullName;
+        return cleanName(fullName);
     }
 
     public void setFullName(String fullName) {
-        this.fullName = fullName;
+        this.fullName = cleanName(fullName);
+    }
+
+    public String getDisplayName() {
+        String cleanedName = cleanName(fullName);
+        if (cleanedName != null && !cleanedName.isBlank()) {
+            return cleanedName;
+        }
+
+        String cleanedLogin = cleanName(login);
+        if (cleanedLogin != null && !cleanedLogin.isBlank()) {
+            return cleanedLogin;
+        }
+
+        return "Usuario";
+    }
+
+    private String cleanName(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String cleaned = value
+                .replaceAll("(?i)\\bnull\\b", "")
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        return cleaned.isBlank() ? null : cleaned;
     }
 }

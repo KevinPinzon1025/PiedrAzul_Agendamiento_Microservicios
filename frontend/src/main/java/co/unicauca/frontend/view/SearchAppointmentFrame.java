@@ -111,9 +111,7 @@ public class SearchAppointmentFrame extends Application {
         VBox userBox = new VBox(4);
         userBox.setAlignment(Pos.CENTER_RIGHT);
         AuthResponse currentUser = AuthSession.getCurrentUser();
-        String displayName = currentUser != null && currentUser.getFullName() != null && !currentUser.getFullName().isBlank()
-                ? currentUser.getFullName()
-                : currentUser != null && currentUser.getLogin() != null ? currentUser.getLogin() : "Usuario";
+        String displayName = currentUser != null ? currentUser.getDisplayName() : "Usuario";
         String role = currentUser != null && currentUser.getRole() != null ? currentUser.getRole() : "";
 
         Label lblUser = new Label(displayName);

@@ -13,18 +13,27 @@ public class DataInitializer {
     @Bean
     CommandLineRunner seedUsers(UserCredentialRepository repository) {
         return args -> {
-            if (repository.count() == 0) {
-                repository.save(UserCredential.builder()
-                        .login("admin")
-                        .documentNumber("admin")
-                        .active(true)
-                        .firstName("Admin")
-                        .firstLastName("PiedraAzul")
-                        .phone("0000000000")
-                        .gender("Otro")
-                        .role(Role.ADMIN)
-                        .build());
-            }
+            createIfMissing(repository, "123", "Admin", "PiedraAzul", Role.ADMIN);
+            createIfMissing(repository, "124", "Agendador", "PiedraAzul", Role.SCHEDULER);
+            createIfMissing(repository, "125", "Medico", "PiedraAzul", Role.PROFESSIONAL);
         };
+    }
+
+    private void createIfMissing(UserCredentialRepository repository, String login, String firstName,
+            String firstLastName, Role role) {
+        if (repository.existsByLogin(login)) {
+            return;
+        }
+
+        repository.save(UserCredential.builder()
+                .login(login)
+                .documentNumber(login)
+                .active(true)
+                .firstName(firstName)
+                .firstLastName(firstLastName)
+                .phone("0000000000")
+                .gender("Otro")
+                .role(role)
+                .build());
     }
 }
