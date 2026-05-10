@@ -1,18 +1,15 @@
 package co.unicauca.infra.dataLoader;
 
-import co.unicauca.Entity.model.Appointment;
-import co.unicauca.Entity.model.Patient;
-import co.unicauca.Entity.model.Professional;
-import co.unicauca.Entity.model.Scheduler;
-import co.unicauca.Repository.IAppointmentRepository;
-import co.unicauca.Repository.IPatientRepository;
-import co.unicauca.Repository.IProfessionalRepository;
-import co.unicauca.Repository.ISchedulerRepository;
+import co.unicauca.Entity.model.*;
+import co.unicauca.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -26,6 +23,8 @@ public class DataLoader implements CommandLineRunner {
     private ISchedulerRepository schedulerRepository;
     @Autowired
     private IPatientRepository patientRepository;
+    @Autowired
+    private IProfessionalWorkingDayRepository professionalWorkingDayRepository;
 
    @Override
    public void run(String... args) throws Exception {
@@ -74,8 +73,101 @@ public class DataLoader implements CommandLineRunner {
         );
         appointmentRepository.saveAll(appointments);
 
+
+       List<ProfessionalWorkingDay> workingDays =
+               new ArrayList<>();
+
+       for (Professional professional : professionals) {
+
+           // Lunes
+           workingDays.add(
+                   buildWorkingDay(
+                           professional,
+                           DayOfWeek.MONDAY,
+                           "08:00",
+                           "12:00",
+                           30
+                   )
+           );
+
+           // Martes
+           workingDays.add(
+                   buildWorkingDay(
+                           professional,
+                           DayOfWeek.TUESDAY,
+                           "08:00",
+                           "12:00",
+                           30
+                   )
+           );
+
+           // Miércoles
+           workingDays.add(
+                   buildWorkingDay(
+                           professional,
+                           DayOfWeek.WEDNESDAY,
+                           "14:00",
+                           "18:00",
+                           30
+                   )
+           );
+
+           // Jueves
+           workingDays.add(
+                   buildWorkingDay(
+                           professional,
+                           DayOfWeek.THURSDAY,
+                           "08:00",
+                           "12:00",
+                           20
+                   )
+           );
+
+           // Viernes
+           workingDays.add(
+                   buildWorkingDay(
+                           professional,
+                           DayOfWeek.FRIDAY,
+                           "09:00",
+                           "13:00",
+                           60
+                   )
+           );
+       }
+
+       professionalWorkingDayRepository.saveAll(workingDays);
+
         System.out.println("Datos de prueba cargados correctamente");
     }
 
+    private ProfessionalWorkingDay buildWorkingDay(
+            Professional professional,
+            DayOfWeek dayOfWeek,
+            String start,
+            String end,
+            Integer duration
+    ) {
+
+        ProfessionalWorkingDay workingDay =
+                new ProfessionalWorkingDay();
+
+        workingDay.setProfessional(professional);
+
+        workingDay.setDayOfWeek(dayOfWeek);
+
+        workingDay.setStartTime(
+                LocalTime.parse(start)
+        );
+
+        workingDay.setEndTime(
+                LocalTime.parse(end)
+        );
+
+        workingDay.setAppointmentDurationMinutes(
+                duration
+        );
+
+        return workingDay;
+    }
 
 }
