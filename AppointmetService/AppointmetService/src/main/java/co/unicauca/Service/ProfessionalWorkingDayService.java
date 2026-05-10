@@ -8,6 +8,7 @@ import co.unicauca.Repository.IProfessionalRepository;
 import co.unicauca.Repository.IProfessionalWorkingDayRepository;
 import co.unicauca.infra.dto.SlotResponseDTO;
 import co.unicauca.infra.dto.WorkingDayDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -34,6 +35,7 @@ public class ProfessionalWorkingDayService {
         this.appointmentRepository = appointmentRepository;
     }
 
+    @Transactional
     public void configureAvailability(
             Long professionalId,
             List<WorkingDayDTO> workingDays
