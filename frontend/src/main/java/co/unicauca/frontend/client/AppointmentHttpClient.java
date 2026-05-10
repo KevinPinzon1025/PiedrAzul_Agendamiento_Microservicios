@@ -2,18 +2,18 @@
 package co.unicauca.frontend.client;
 
 
-import co.unicauca.frontend.dto.AppointmentDTO;
-import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
-import co.unicauca.frontend.dto.ProfessionalDTO;
+import co.unicauca.frontend.dto.*;
 import co.unicauca.frontend.util.IAdapter;
 import co.unicauca.frontend.util.JsonUtil;
 import co.unicauca.frontend.util.ProfessionalAdapter;
-import co.unicauca.frontend.dto.PatientDTO;
 import co.unicauca.frontend.util.PatientAdapter;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.net.http.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -183,6 +183,80 @@ public class AppointmentHttpClient {
             }
 
         } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<String> getAvailableSlots(
+            Long professionalId,
+            LocalDate date
+    ) {
+
+        try {
+
+            String url =
+                    BASE_URL +
+                            "/agenda/" +
+                            professionalId +
+                            "/available-slots?date=" +
+                            date;
+
+            System.out.println("Consultando URL:");
+            System.out.println(url);
+
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .GET()
+                            .build();
+
+            HttpResponse<String> response =
+                    client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofString()
+                    );
+
+          /*  System.out.println("STATUS:");
+            System.out.println(response.statusCode());
+
+            System.out.println("BODY:");
+            System.out.println(response.body());*/
+
+            if (response.statusCode() != 200) {
+
+                throw new RuntimeException(
+                        "Error obteniendo slots. Status: "
+                                + response.statusCode()
+                                + " Body: "
+                                + response.body()
+                );
+            }
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            List<SlotResponseDTO> slots =
+                    mapper.readValue(
+                            response.body(),
+                            new TypeReference<List<SlotResponseDTO>>() {}
+                    );
+
+            List<String> formattedSlots =
+                    new ArrayList<>();
+
+            for (SlotResponseDTO slot : slots) {
+
+                formattedSlots.add(
+                        slot.getStartTime()
+                                .substring(0, 5)
+                );
+            }
+
+            return formattedSlots;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
 
             throw new RuntimeException(e);
         }

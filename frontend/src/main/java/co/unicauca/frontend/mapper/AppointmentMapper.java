@@ -23,9 +23,9 @@ public class AppointmentMapper {
                 ? dto.getProfessional().getProfName()
                 : "";
 
-        if (dto.getAppointmenDate() != null) {
-            vm.date = dto.getAppointmenDate().toLocalDate().toString();
-            vm.time = dto.getAppointmenDate().toLocalTime().toString();
+        if (dto.getAppointmentDate() != null) {
+            vm.date = dto.getAppointmentDate().toLocalDate().toString();
+            vm.time = dto.getAppointmentDate().toLocalTime().toString();
         }
 
         return vm;
