@@ -30,11 +30,6 @@
             <version>2.18.3</version>
         </dependency>
         <dependency>
-            <groupId>co.unicauca</groupId>
-            <artifactId>frontend</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.17.3</version>
@@ -46,4 +41,17 @@
         <maven.compiler.target>17</maven.compiler.target>
         <exec.mainClass>co.unicauca.frontend.Frontend</exec.mainClass>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>co.unicauca.frontend.Frontend</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
