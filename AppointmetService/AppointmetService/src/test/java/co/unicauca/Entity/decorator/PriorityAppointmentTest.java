@@ -14,7 +14,7 @@ class PriorityAppointmentTest {
         Appointment appointment = new Appointment(new CreatedAppointment());
         appointment.setObservation("Consulta general");
         appointment.setSchedulingDate(LocalDateTime.now());
-        appointment.setAppointmenDate(LocalDateTime.now().plusDays(1));
+        appointment.setAppointmentDate(LocalDateTime.now().plusDays(1));
         appointment.setPatient(1L);
         appointment.setProfessional(1L);
         appointment.setScheduler(1L);

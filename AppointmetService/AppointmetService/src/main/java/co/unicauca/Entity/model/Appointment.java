@@ -28,7 +28,7 @@ public class Appointment implements AppointmetDecorator {
     private LocalDateTime schedulingDate;
 
     @Column(name = "appointment_date", nullable = false)
-    private LocalDateTime appointmenDate;
+    private LocalDateTime appointmentDate;
 
     @Column(name = "observation", nullable = false, length = 255)
     private String observation;

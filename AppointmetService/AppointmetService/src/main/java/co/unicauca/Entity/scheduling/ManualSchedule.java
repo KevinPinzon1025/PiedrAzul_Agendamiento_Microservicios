@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 public class ManualSchedule extends AppointmentScheduler {
     @Override
     protected boolean checkAvailability(Appointment appointment) {
-        if (appointment.getAppointmenDate().isBefore(LocalDateTime.now())) {
+        if (appointment.getAppointmentDate().isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("No se puede agendar en el pasado");
         }
         //validacion sencilla, no es fin de semana?
-        DayOfWeek day = appointment.getAppointmenDate().getDayOfWeek();
+        DayOfWeek day = appointment.getAppointmentDate().getDayOfWeek();
         return day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY;
     }
 

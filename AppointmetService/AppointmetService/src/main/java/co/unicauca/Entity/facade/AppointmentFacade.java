@@ -80,7 +80,7 @@ public class AppointmentFacade {
         appointment.setPatient(patient);
         appointment.setProfessional(professional);
         appointment.setObservation(request.getObservation());
-        appointment.setAppointmenDate(request.getAppointmentDate());
+        appointment.setAppointmentDate(request.getAppointmentDate());
         appointment.setSchedulingDate(LocalDateTime.now());
         appointment.setScheduler(scheduler);
 
@@ -100,7 +100,7 @@ public class AppointmentFacade {
         AppointmentCreatedEvent event = new AppointmentCreatedEvent(
                 saved.getIdAppointment(),
                 saved.getSchedulingDate(),
-                saved.getAppointmenDate(),
+                saved.getAppointmentDate(),
                 saved.getObservation(),
                 saved.getScheduler()==null ?
                         null : saved.getScheduler().getId(),

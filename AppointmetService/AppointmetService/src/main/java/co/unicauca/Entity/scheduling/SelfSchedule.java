@@ -10,11 +10,11 @@ public class SelfSchedule extends AppointmentScheduler {
     @Override
     protected boolean checkAvailability(Appointment appointment) {
 
-        if (appointment.getAppointmenDate().isBefore(LocalDateTime.now())) {
+        if (appointment.getAppointmentDate().isBefore(LocalDateTime.now())) {
             throw new IllegalStateException("No se puede agendar en el pasado");
         }
         // validacion, es horario laboral?
-        int hour = appointment.getAppointmenDate().getHour();
+        int hour = appointment.getAppointmentDate().getHour();
         if (hour < 7 || hour > 12) {
             throw new IllegalStateException("Fuera del horario laboral");
         }

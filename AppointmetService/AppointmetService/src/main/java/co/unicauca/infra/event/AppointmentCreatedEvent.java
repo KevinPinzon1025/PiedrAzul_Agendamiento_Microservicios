@@ -7,7 +7,7 @@ public class AppointmentCreatedEvent implements Serializable {
 
     private long idAppointment;
     private LocalDateTime schedulingDate;
-    private LocalDateTime appointmenDate;
+    private LocalDateTime appointmentDate;
     private String observation;
     private Long scheduler;
     private long patient;
@@ -17,14 +17,14 @@ public class AppointmentCreatedEvent implements Serializable {
 
     public AppointmentCreatedEvent(long idAppointment,
                                    LocalDateTime schedulingDate,
-                                   LocalDateTime appointmenDate,
+                                   LocalDateTime appointmentDate,
                                    String observation,
                                    Long scheduler,
                                    long patient,
                                    long professional) {
         this.idAppointment  = idAppointment;
         this.schedulingDate = schedulingDate;
-        this.appointmenDate = appointmenDate;
+        this.appointmentDate = appointmentDate;
         this.observation    = observation;
         this.scheduler      = scheduler;
         this.patient        = patient;
@@ -37,8 +37,8 @@ public class AppointmentCreatedEvent implements Serializable {
     public LocalDateTime getSchedulingDate() { return schedulingDate; }
     public void setSchedulingDate(LocalDateTime v) { this.schedulingDate = v; }
 
-    public LocalDateTime getAppointmenDate() { return appointmenDate; }
-    public void setAppointmenDate(LocalDateTime v) { this.appointmenDate = v; }
+    public LocalDateTime getAppointmentDate() { return appointmentDate; }
+    public void setAppointmentDate(LocalDateTime v) { this.appointmentDate = v; }
 
     public String getObservation() { return observation; }
     public void setObservation(String v) { this.observation = v; }
@@ -58,7 +58,7 @@ public class AppointmentCreatedEvent implements Serializable {
                 "idAppointment=" + idAppointment +
                 ", patient=" + patient +
                 ", professional=" + professional +
-                ", appointmenDate=" + appointmenDate +
+                ", appointmenDate=" + appointmentDate +
                 ", observation='" + observation + '\'' +
                 '}';
     }

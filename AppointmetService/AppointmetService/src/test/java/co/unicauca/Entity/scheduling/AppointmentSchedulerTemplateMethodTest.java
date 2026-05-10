@@ -15,7 +15,7 @@ class AppointmentSchedulerTemplateMethodTest {
 
     private static Appointment baseAppointment(LocalDateTime appointmentDate, long professionalId) {
         Appointment appointment = new Appointment(new CreatedAppointment());
-        appointment.setAppointmenDate(appointmentDate);
+        appointment.setAppointmentDate(appointmentDate);
         appointment.setProfessional(professionalId);
         appointment.setSchedulingDate(LocalDateTime.now());
         appointment.setObservation("test");
