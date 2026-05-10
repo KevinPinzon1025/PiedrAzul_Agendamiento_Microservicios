@@ -1,10 +1,9 @@
-
-
 package co.unicauca.frontend.controller;
 
 import co.unicauca.frontend.client.AppointmentHttpClient;
 import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
 import co.unicauca.frontend.dto.SchedulingType;
+import co.unicauca.frontend.util.AppointmentSubject;
 import co.unicauca.frontend.view.ScheduleAppointmentFrame;
 
 import java.time.LocalDate;
@@ -172,6 +171,7 @@ public class ScheduleAppointmentController {
             request.setSchedulerId(1L);
 
             httpClient.createAppointment(request);
+            AppointmentSubject.notifyObservers();
 
             showSuccess(
                     "La cita se registró correctamente."

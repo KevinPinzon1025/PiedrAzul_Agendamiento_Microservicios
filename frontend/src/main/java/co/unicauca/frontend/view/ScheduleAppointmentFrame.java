@@ -822,6 +822,44 @@ public class ScheduleAppointmentFrame extends Application {
                 createSecondaryButton(
                         "Consultar horarios"
                 );
+        btnConsultarHorarios.setOnAction(e -> {
+
+            try {
+
+                String professional =
+                        cbProfessional.getValue();
+
+                LocalDate date =
+                        datePicker.getValue();
+
+                if (professional == null ||
+                        date == null) {
+
+                    lblFeedback.setText(
+                            "Seleccione profesional y fecha primero."
+                    );
+
+                    return;
+                }
+
+                ConsultScheduleFrame consultFrame =
+                        new ConsultScheduleFrame(
+                                stage,
+                                professional,
+                                date
+                        );
+
+                consultFrame.show();
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+
+                lblFeedback.setText(
+                        "No fue posible abrir la consulta de horarios."
+                );
+            }
+        });
 
         topActions.getChildren().addAll(
                 btnNewPatient,

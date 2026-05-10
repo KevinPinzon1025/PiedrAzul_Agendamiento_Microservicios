@@ -1,6 +1,7 @@
 package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.controller.SearchAppointmentController;
+import co.unicauca.frontend.dto.AppointmentDTO;
 import co.unicauca.frontend.dto.AuthResponse;
 import co.unicauca.frontend.dto.AuthSession;
 import co.unicauca.frontend.viewmodel.AppointmentViewModel;

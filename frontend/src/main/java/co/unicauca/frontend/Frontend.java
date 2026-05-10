@@ -10,7 +10,3 @@ public class Frontend {
    //public static void main(String[] args) {Application.launch(SelfServiceAppointmentFrame.class, args);}
 }
 
-/*
- * TODO
- * - conectar
- */

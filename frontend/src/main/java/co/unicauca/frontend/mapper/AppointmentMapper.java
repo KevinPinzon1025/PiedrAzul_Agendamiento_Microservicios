@@ -3,6 +3,7 @@ package co.unicauca.frontend.mapper;
 import co.unicauca.frontend.dto.AppointmentDTO;
 import co.unicauca.frontend.viewmodel.AppointmentViewModel;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,9 @@ public class AppointmentMapper {
 
         if (dto.getAppointmentDate() != null) {
             vm.date = dto.getAppointmentDate().toLocalDate().toString();
-            vm.time = dto.getAppointmentDate().toLocalTime().toString();
+            vm.time = dto.getAppointmentDate()
+                    .toLocalTime()
+                    .format(DateTimeFormatter.ofPattern("HH:mm"));
         }
 
         return vm;
