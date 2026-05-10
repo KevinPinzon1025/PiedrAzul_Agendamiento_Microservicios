@@ -5,6 +5,8 @@ import com.piedraazul.patient.dto.UpdatePatientRequest;
 import com.piedraazul.patient.entity.Patient;
 import com.piedraazul.patient.exception.PatientAlreadyExistsException;
 import com.piedraazul.patient.exception.PatientNotFoundException;
+import com.piedraazul.patient.infra.event.PatientCreatedEvent;
+import com.piedraazul.patient.infra.messaging.PatientEventPublisher;
 import com.piedraazul.patient.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class PatientService {
 
     private final PatientRepository repository;
+    private final PatientEventPublisher eventPublisher;
 
     public Patient create(CreatePatientRequest request) {
         if (repository.existsByDocumentNumber(request.getDocumentNumber())) {
@@ -42,7 +45,9 @@ public class PatientService {
                 .updatedAt(null)
                 .build();
 
-        return repository.save(patient);
+        Patient savedPatient = repository.save(patient);
+        eventPublisher.publish(PatientCreatedEvent.from(savedPatient));
+        return savedPatient;
     }
 
     public List<Patient> findAll() {

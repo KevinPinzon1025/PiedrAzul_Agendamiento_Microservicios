@@ -5,6 +5,8 @@ import com.piedraazul.patient.dto.UpdatePatientRequest;
 import com.piedraazul.patient.entity.Patient;
 import com.piedraazul.patient.exception.PatientAlreadyExistsException;
 import com.piedraazul.patient.exception.PatientNotFoundException;
+import com.piedraazul.patient.infra.event.PatientCreatedEvent;
+import com.piedraazul.patient.infra.messaging.PatientEventPublisher;
 import com.piedraazul.patient.repository.PatientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ class PatientServiceTest {
 
     @Mock
     private PatientRepository repository;
+
+    @Mock
+    private PatientEventPublisher eventPublisher;
 
     @InjectMocks
     private PatientService patientService;
@@ -100,8 +105,13 @@ class PatientServiceTest {
         assertNotNull(result.getId());
         assertNotNull(result.getCreatedAt());
 
+        ArgumentCaptor<PatientCreatedEvent> eventCaptor = ArgumentCaptor.forClass(PatientCreatedEvent.class);
+
         verify(repository).existsByDocumentNumber("123456");
         verify(repository).save(any(Patient.class));
+        verify(eventPublisher).publish(eventCaptor.capture());
+        assertEquals(result.getId(), eventCaptor.getValue().getId());
+        assertEquals("Juan Carlos Perez Gomez", eventCaptor.getValue().getPatName());
     }
 
     @Test
@@ -112,6 +122,7 @@ class PatientServiceTest {
 
         verify(repository).existsByDocumentNumber("123456");
         verify(repository, never()).save(any(Patient.class));
+        verifyNoInteractions(eventPublisher);
     }
 
     @Test
