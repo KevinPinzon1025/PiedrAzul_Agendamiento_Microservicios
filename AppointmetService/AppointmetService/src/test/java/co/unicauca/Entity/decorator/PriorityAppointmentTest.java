@@ -1,6 +1,9 @@
 package co.unicauca.Entity.decorator;
 
 import co.unicauca.Entity.model.Appointment;
+import co.unicauca.Entity.model.Patient;
+import co.unicauca.Entity.model.Professional;
+import co.unicauca.Entity.model.Scheduler;
 import co.unicauca.Entity.state.CreatedAppointment;
 import org.junit.jupiter.api.Test;
 
@@ -11,13 +14,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PriorityAppointmentTest {
 
     private static Appointment baseAppointment() {
+        Patient patient = new Patient();
+        patient.setId(1L);
+        patient.setPatName("Paciente");
+        Professional professional = new Professional();
+        professional.setId(1L);
+        professional.setProfName("Profesional");
+        Scheduler scheduler = new Scheduler();
+        scheduler.setId(1L);
+        scheduler.setSchedulerName("Agendador");
+
         Appointment appointment = new Appointment(new CreatedAppointment());
         appointment.setObservation("Consulta general");
         appointment.setSchedulingDate(LocalDateTime.now());
         appointment.setAppointmentDate(LocalDateTime.now().plusDays(1));
-        appointment.setPatient(1L);
-        appointment.setProfessional(1L);
-        appointment.setScheduler(1L);
+        appointment.setPatient(patient);
+        appointment.setProfessional(professional);
+        appointment.setScheduler(scheduler);
         return appointment;
     }
 

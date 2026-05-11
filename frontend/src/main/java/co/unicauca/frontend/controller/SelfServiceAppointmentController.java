@@ -12,6 +12,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import co.unicauca.frontend.view.SelfServiceAppointmentFrame;
+import javafx.scene.control.*;
 
 public class SelfServiceAppointmentController {
 
@@ -199,6 +200,8 @@ public class SelfServiceAppointmentController {
                     "¡Cita agendada con éxito!"
             );
 
+            showSuccess("Cita agendada con exito!");
+
             clearForm();
 
         } catch (Exception ex) {
@@ -250,4 +253,46 @@ public class SelfServiceAppointmentController {
 
         view.lblFeedback.setText("");
     }
+
+    private void showSuccess(String message) {
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setTitle("Éxito");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        // Cambiar texto del botón
+        ButtonType acceptButton = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(acceptButton);
+
+        // Obtener el DialogPane para aplicar estilos
+        DialogPane dialogPane = alert.getDialogPane();
+
+        dialogPane.setStyle(
+                "-fx-background-color: #ecfbf1;" +
+                        "-fx-background-radius: 14;" +
+                        "-fx-border-radius: 14;" +
+                        "-fx-padding: 12;"
+        );
+
+        // Estilo del texto
+        dialogPane.lookup(".content.label").setStyle(
+                "-fx-text-fill: #0c5b3f;" +
+                        "-fx-font-size: 14px;"
+        );
+
+        // Estilo del botón
+        Button button = (Button) dialogPane.lookupButton(acceptButton);
+
+        button.setStyle(
+                "-fx-background-color: #0c5b3f;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-padding: 8 18 8 18;"
+        );
+
+        alert.showAndWait();
+    }
+
 }

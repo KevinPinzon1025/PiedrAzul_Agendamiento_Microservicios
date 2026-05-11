@@ -5,6 +5,7 @@ import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
 import co.unicauca.frontend.dto.SchedulingType;
 import co.unicauca.frontend.util.AppointmentSubject;
 import co.unicauca.frontend.view.ScheduleAppointmentFrame;
+import javafx.scene.control.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -223,15 +224,46 @@ public class ScheduleAppointmentController {
         view.lblFeedback.setText(message);
     }
 
-    private void showSuccess(String message) {
 
-        view.lblFeedback.setStyle(
-                "-fx-text-fill: #0c5b3f;" +
-                        "-fx-background-color: #ecfbf1;" +
+   private void showSuccess(String message) {
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setTitle("Éxito");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        // Cambiar texto del botón
+        ButtonType acceptButton = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+        alert.getButtonTypes().setAll(acceptButton);
+
+        // Obtener el DialogPane para aplicar estilos
+        DialogPane dialogPane = alert.getDialogPane();
+
+        dialogPane.setStyle(
+                "-fx-background-color: #ecfbf1;" +
                         "-fx-background-radius: 14;" +
+                        "-fx-border-radius: 14;" +
                         "-fx-padding: 12;"
         );
 
-        view.lblFeedback.setText(message);
+        // Estilo del texto
+        dialogPane.lookup(".content.label").setStyle(
+                "-fx-text-fill: #0c5b3f;" +
+                        "-fx-font-size: 14px;"
+        );
+
+        // Estilo del botón
+        Button button = (Button) dialogPane.lookupButton(acceptButton);
+
+        button.setStyle(
+                "-fx-background-color: #0c5b3f;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-padding: 8 18 8 18;"
+        );
+
+        alert.showAndWait();
     }
+
 }
