@@ -110,7 +110,10 @@ class PatientServiceTest {
         verify(repository).existsByDocumentNumber("123456");
         verify(repository).save(any(Patient.class));
         verify(eventPublisher).publish(eventCaptor.capture());
-        assertEquals(result.getId(), eventCaptor.getValue().getId());
+        assertEquals(
+                Long.parseLong(result.getDocumentNumber()),
+                eventCaptor.getValue().getId()
+        );
         assertEquals("Juan Carlos Perez Gomez", eventCaptor.getValue().getPatName());
     }
 
