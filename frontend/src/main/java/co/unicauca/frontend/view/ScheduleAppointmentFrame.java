@@ -364,10 +364,41 @@ public class ScheduleAppointmentFrame extends Application {
                         "Nuevo paciente"
                 );
 
+        btnNewPatient.setOnAction(e -> {
+
+            PatientRegistrationDialog dialog =
+                    new PatientRegistrationDialog(
+                            stage,
+                            () -> {
+                                try {
+                                    Thread.sleep(700);
+                                } catch (InterruptedException ex) {
+                                    Thread.currentThread().interrupt();
+                                }
+
+                                controller.initData();
+
+                                lblFeedback.setStyle(
+                                        "-fx-text-fill: #0c5b3f;" +
+                                                "-fx-background-color: #ecfbf1;" +
+                                                "-fx-background-radius: 14;" +
+                                                "-fx-padding: 12;"
+                                );
+
+                                lblFeedback.setText(
+                                        "Paciente creado correctamente. La lista de pacientes fue actualizada."
+                                );
+                            }
+                    );
+
+            dialog.show();
+        });
+
         Button btnConsultarHorarios =
                 createSecondaryButton(
                         "Consultar horarios"
                 );
+
         btnConsultarHorarios.setOnAction(e -> {
 
             try {
