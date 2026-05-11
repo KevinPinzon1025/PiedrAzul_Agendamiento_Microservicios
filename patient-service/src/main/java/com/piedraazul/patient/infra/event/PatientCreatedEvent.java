@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,11 +16,14 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class PatientCreatedEvent implements Serializable {
 
-    private UUID id;
+    private Long id;
     private String patName;
 
     public static PatientCreatedEvent from(Patient patient) {
-        return new PatientCreatedEvent(patient.getId(), buildPatientName(patient));
+        return new PatientCreatedEvent(
+                Long.parseLong(patient.getDocumentNumber()),
+                buildPatientName(patient)
+        );
     }
 
     private static String buildPatientName(Patient patient) {
