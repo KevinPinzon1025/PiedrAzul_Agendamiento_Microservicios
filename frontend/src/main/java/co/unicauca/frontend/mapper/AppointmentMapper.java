@@ -31,6 +31,8 @@ public class AppointmentMapper {
                     .format(DateTimeFormatter.ofPattern("HH:mm"));
         }
 
+        vm.appointment = dto;
+
         return vm;
     }
 

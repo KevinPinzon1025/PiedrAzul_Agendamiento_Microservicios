@@ -22,6 +22,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -267,6 +268,29 @@ public class SearchAppointmentFrame extends Application {
 
         table.getColumns().addAll(colId, colDoctor, colPatient, colDate, colTime);
 
+        table.setRowFactory(tv -> {
+
+            javafx.scene.control.TableRow<AppointmentViewModel> row =
+                    new javafx.scene.control.TableRow<>();
+
+            row.setOnMouseClicked(event -> {
+
+                if (!row.isEmpty()
+                        && event.getButton() == MouseButton.PRIMARY
+                        && event.getClickCount() == 2) {
+
+                    AppointmentViewModel selected =
+                            row.getItem();
+
+                    openRescheduleWindow(
+                            selected.appointment
+                    );
+                }
+            });
+
+            return row;
+        });
+
         lblTotal = new Label("Total de citas: 0");
         lblTotal.setFont(Font.font("System", FontWeight.BOLD, 18));
         lblTotal.setStyle("-fx-text-fill: #244b68;");
@@ -321,6 +345,29 @@ public class SearchAppointmentFrame extends Application {
         alert.setHeaderText("Resultado");
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    private void openRescheduleWindow(
+            AppointmentDTO appointment
+    ) {
+
+        try {
+
+            ReScheduleAppointmentFrame frame =
+                    new ReScheduleAppointmentFrame(
+                            appointment
+                    );
+
+            frame.show(new Stage());
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            showAlert(
+                    "No fue posible abrir la ventana de reagendamiento."
+            );
+        }
     }
 
     private class FxViewAdapter implements SearchAppointmentController.View {
