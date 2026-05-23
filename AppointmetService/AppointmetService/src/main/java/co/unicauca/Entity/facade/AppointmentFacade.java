@@ -105,7 +105,9 @@ public class AppointmentFacade {
                 saved.getScheduler()==null ?
                         null : saved.getScheduler().getId(),
                 saved.getPatient().getId(),
-                saved.getProfessional().getId()
+                saved.getPatient().getPatName(),
+                saved.getProfessional().getId(),
+                saved.getProfessional().getProfName()
         );
         eventPublisher.publish(event);
 

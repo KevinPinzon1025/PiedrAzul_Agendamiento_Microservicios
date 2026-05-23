@@ -36,10 +36,29 @@ public class AppointmentService {
             String professional,
             LocalDate date
     ) {
+        return findByProfessionalAndDate(null, professional, date);
+    }
+
+    public List<Appointment> findByProfessionalAndDate(
+            Long professionalId,
+            String professional,
+            LocalDate date
+    ) {
 
         LocalDateTime start = date.atStartOfDay();
 
         LocalDateTime end = date.atTime(23, 59, 59);
+
+        if (professionalId != null) {
+            return repository.findByProfessionalIdAndDate(
+                    professionalId,
+                    date
+            );
+        }
+
+        if (professional == null || professional.isBlank()) {
+            throw new IllegalArgumentException("professionalId o professional es requerido");
+        }
 
         return repository.findByProfessionalAndDate(
                 professional,
