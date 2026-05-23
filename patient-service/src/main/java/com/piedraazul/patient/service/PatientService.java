@@ -5,6 +5,7 @@ import com.piedraazul.patient.dto.UpdatePatientRequest;
 import com.piedraazul.patient.entity.Patient;
 import com.piedraazul.patient.exception.PatientAlreadyExistsException;
 import com.piedraazul.patient.exception.PatientNotFoundException;
+import com.piedraazul.patient.infra.event.AuthUserCreatedEvent;
 import com.piedraazul.patient.infra.event.PatientCreatedEvent;
 import com.piedraazul.patient.infra.messaging.PatientEventPublisher;
 import com.piedraazul.patient.repository.PatientRepository;
@@ -48,6 +49,40 @@ public class PatientService {
         Patient savedPatient = repository.save(patient);
         eventPublisher.publish(PatientCreatedEvent.from(savedPatient));
         return savedPatient;
+    }
+
+    public Patient createFromAuthUser(AuthUserCreatedEvent event) {
+        if (event == null || event.getDocumentNumber() == null || event.getDocumentNumber().isBlank()) {
+            throw new IllegalArgumentException("El evento de usuario creado no tiene documento");
+        }
+        if (event.getRole() != null && !"PATIENT".equalsIgnoreCase(event.getRole())) {
+            return null;
+        }
+
+        return repository.findByDocumentNumber(event.getDocumentNumber())
+                .orElseGet(() -> {
+                    Patient patient = Patient.builder()
+                            .id(UUID.randomUUID())
+                            .authUserId(null)
+                            .firstName(event.getFirstName())
+                            .secondName(event.getSecondName())
+                            .firstLastName(event.getFirstLastName())
+                            .secondLastName(event.getSecondLastName())
+                            .documentType("CC")
+                            .documentNumber(event.getDocumentNumber())
+                            .email(event.getEmail())
+                            .cellNumber(event.getPhone())
+                            .gender(event.getGender())
+                            .birthDate(event.getBirthDate())
+                            .active(event.isActive())
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(null)
+                            .build();
+
+                    Patient savedPatient = repository.save(patient);
+                    eventPublisher.publish(PatientCreatedEvent.from(savedPatient));
+                    return savedPatient;
+                });
     }
 
     public List<Patient> findAll() {
