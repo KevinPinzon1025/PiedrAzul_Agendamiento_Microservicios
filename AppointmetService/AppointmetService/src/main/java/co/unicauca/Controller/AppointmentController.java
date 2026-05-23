@@ -2,17 +2,16 @@ package co.unicauca.Controller;
 
 import co.unicauca.Entity.facade.AppointmentFacade;
 import co.unicauca.Entity.model.Appointment;
-import co.unicauca.Entity.model.Professional;
 import co.unicauca.Service.AppointmentService;
-import co.unicauca.Service.ProfessionalService;
 import co.unicauca.infra.dto.CreateAppointmentRequestDTO;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -34,12 +33,17 @@ public class AppointmentController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Appointment>> findByProfessionalAndDate(
-            @RequestParam String professional,
+            @RequestParam(required = false) Long professionalId,
+            @RequestParam(required = false) String professional,
             @RequestParam LocalDate date
     ) {
+        if (professionalId == null && (professional == null || professional.isBlank())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "professionalId o professional es requerido");
+        }
 
         return ResponseEntity.ok(
                 appointmentService.findByProfessionalAndDate(
+                        professionalId,
                         professional,
                         date
                 )

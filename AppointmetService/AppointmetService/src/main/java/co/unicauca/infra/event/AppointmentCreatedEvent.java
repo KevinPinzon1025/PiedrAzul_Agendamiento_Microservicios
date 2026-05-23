@@ -11,7 +11,9 @@ public class AppointmentCreatedEvent implements Serializable {
     private String observation;
     private Long scheduler;
     private long patient;
+    private String patientName;
     private long professional;
+    private String professionalName;
 
     public AppointmentCreatedEvent() {}
 
@@ -21,14 +23,18 @@ public class AppointmentCreatedEvent implements Serializable {
                                    String observation,
                                    Long scheduler,
                                    long patient,
-                                   long professional) {
+                                   String patientName,
+                                   long professional,
+                                   String professionalName) {
         this.idAppointment  = idAppointment;
         this.schedulingDate = schedulingDate;
         this.appointmentDate = appointmentDate;
         this.observation    = observation;
         this.scheduler      = scheduler;
         this.patient        = patient;
+        this.patientName    = patientName;
         this.professional   = professional;
+        this.professionalName = professionalName;
     }
 
     public long getIdAppointment() { return idAppointment; }
@@ -49,8 +55,14 @@ public class AppointmentCreatedEvent implements Serializable {
     public long getPatient() { return patient; }
     public void setPatient(long v) { this.patient = v; }
 
+    public String getPatientName() { return patientName; }
+    public void setPatientName(String v) { this.patientName = v; }
+
     public long getProfessional() { return professional; }
     public void setProfessional(long v) { this.professional = v; }
+
+    public String getProfessionalName() { return professionalName; }
+    public void setProfessionalName(String v) { this.professionalName = v; }
 
     @Override
     public String toString() {

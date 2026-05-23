@@ -80,16 +80,31 @@ class AppointmentControllerTest {
     @Test
     void findByProfessionalAndDate_returnsOk() throws Exception {
         LocalDate date = LocalDate.of(2026, 5, 20);
-        when(appointmentService.findByProfessionalAndDate("Dr. Pérez", date))
+        when(appointmentService.findByProfessionalAndDate(null, "Dr. Perez", date))
                 .thenReturn(List.of(sampleAppointment(1L)));
 
         mockMvc.perform(get("/appointment/search")
-                        .param("professional", "Dr. Pérez")
+                        .param("professional", "Dr. Perez")
                         .param("date", "2026-05-20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idAppointment").value(1));
 
-        verify(appointmentService).findByProfessionalAndDate(eq("Dr. Pérez"), eq(date));
+        verify(appointmentService).findByProfessionalAndDate(eq(null), eq("Dr. Perez"), eq(date));
+    }
+
+    @Test
+    void findByProfessionalIdAndDate_returnsOk() throws Exception {
+        LocalDate date = LocalDate.of(2026, 5, 20);
+        when(appointmentService.findByProfessionalAndDate(2L, null, date))
+                .thenReturn(List.of(sampleAppointment(1L)));
+
+        mockMvc.perform(get("/appointment/search")
+                        .param("professionalId", "2")
+                        .param("date", "2026-05-20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].idAppointment").value(1));
+
+        verify(appointmentService).findByProfessionalAndDate(eq(2L), eq(null), eq(date));
     }
 
     @Test
