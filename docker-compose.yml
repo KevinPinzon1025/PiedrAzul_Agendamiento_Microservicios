@@ -18,5 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
+  report-db:
+    image: postgres:16
+    container_name: report-postgres
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: reportdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    volumes:
+      - report_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reportdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   rabbitmq_data:
+  report_db_data:
