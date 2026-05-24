@@ -1,40 +1,170 @@
-version: '3.8'
-
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.5
+    container_name: piedrazul-keycloak
+    command: start-dev --import-realm --hostname-strict=false
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    networks:
+      - piedrazul-net
+
   rabbitmq:
     image: rabbitmq:3.13-management
-    container_name: piedrAzul-rabbitmq
+    container_name: piedrazul-rabbitmq
     ports:
-      - "5672:5672"    # Puerto AMQP (usado por Spring)
-      - "15672:15672"  # Management UI → http://localhost:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - piedrazul-net
 
-  report-db:
-    image: postgres:16
-    container_name: report-postgres
-    ports:
-      - "5435:5432"
+  auth-db:
+    image: postgres:16-alpine
+    container_name: piedrazul-auth-db
     environment:
-      POSTGRES_DB: reportdb
+      POSTGRES_DB: authdb
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
+      POSTGRES_PASSWORD: "123"
+    ports:
+      - "5432:5432"
     volumes:
-      - report_db_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d reportdb"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - piedrazul-net
+
+  appointment-db:
+    image: postgres:16-alpine
+    container_name: piedrazul-appointment-db
+    environment:
+      POSTGRES_DB: AppointmentMS_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123"
+    ports:
+      - "5434:5432"
+    volumes:
+      - appointment-db-data:/var/lib/postgresql/data
+    networks:
+      - piedrazul-net
+
+  patient-db:
+    image: postgres:16-alpine
+    container_name: piedrazul-patient-db
+    environment:
+      POSTGRES_DB: patient_db
+      POSTGRES_USER: patient_user
+      POSTGRES_PASSWORD: patient_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - patient-db-data:/var/lib/postgresql/data
+    networks:
+      - piedrazul-net
+
+  auth-service:
+    build:
+      context: ./AuthService
+    container_name: piedrazul-auth-service
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "123"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8082:8082"
+    depends_on:
+      - auth-db
+      - rabbitmq
+    networks:
+      - piedrazul-net
+
+  appointment-service:
+    build:
+      context: ./AppointmentService
+    container_name: piedrazul-appointment-service
+    environment:
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://appointment-db:5432/AppointmentMS_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "123"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8083:8083"
+    depends_on:
+      - appointment-db
+      - rabbitmq
+    networks:
+      - piedrazul-net
+
+  patient-service:
+    build:
+      context: ./patientService
+    container_name: piedrazul-patient-service
+    environment:
+      SERVER_PORT: 8084
+      SPRING_DATASOURCE_URL: jdbc:postgresql://patient-db:5432/patient_db
+      SPRING_DATASOURCE_USERNAME: patient_user
+      SPRING_DATASOURCE_PASSWORD: patient_pass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    ports:
+      - "8084:8084"
+    depends_on:
+      - patient-db
+      - rabbitmq
+    networks:
+      - piedrazul-net
+
+  professional-service:
+    build:
+      context: ./professionalService
+    container_name: piedrazul-professional-service
+    environment:
+      SERVER_PORT: 8085
+    ports:
+      - "8085:8085"
+    networks:
+      - piedrazul-net
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: piedrazul-api-gateway
+    environment:
+      SERVER_PORT: 8081
+      AUTH_SERVICE_URL: http://auth-service:8082
+      APPOINTMENT_SERVICE_URL: http://appointment-service:8083
+      PATIENT_SERVICE_URL: http://patient-service:8084
+      PROFESSIONAL_SERVICE_URL: http://professional-service:8085
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/sistema/protocol/openid-connect/certs
+    ports:
+      - "8081:8081"
+    depends_on:
+      - keycloak
+      - auth-service
+      - appointment-service
+      - patient-service
+      - professional-service
+    networks:
+      - piedrazul-net
 
 volumes:
-  rabbitmq_data:
-  report_db_data:
+  auth-db-data:
+  appointment-db-data:
+  patient-db-data:
+
+networks:
+  piedrazul-net:
+    driver: bridge

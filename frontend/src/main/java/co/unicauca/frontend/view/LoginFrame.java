@@ -14,6 +14,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.PasswordField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -32,6 +33,7 @@ public class LoginFrame extends Application {
 
     private final AuthHttpClient authHttpClient = new AuthHttpClient();
     private TextField txtLogin;
+    private PasswordField txtPassword;
     private Label lblFeedback;
     private Stage stage;
 
@@ -134,10 +136,11 @@ public class LoginFrame extends Application {
         title.setStyle("-fx-text-fill: #163b5b;");
 
         
+        Label requiredInfo = createRequiredInfoLabel();
         VBox form = createForm();
         VBox actions = createActions();
 
-        card.getChildren().addAll(title, form, actions);
+        card.getChildren().addAll(title, requiredInfo, form, actions);
         return card;
     }
 
@@ -146,11 +149,17 @@ public class LoginFrame extends Application {
         form.setAlignment(Pos.CENTER_LEFT);
         form.setPadding(new Insets(10, 0, 0, 0));
 
-        Label lblLogin = createFieldLabel("Número de identificación o usuario");
+        Label lblLogin = createFieldLabel("Número de identificación o usuario", true);
         txtLogin = new TextField();
         txtLogin.setPromptText("Paciente: documento. Personal: admin, medico o agendador");
         styleInput(txtLogin);
         limitLength(txtLogin, 30);
+
+        Label lblPassword = createFieldLabel("Contraseña", true);
+        txtPassword = new PasswordField();
+        txtPassword.setPromptText("Mínimo 6 caracteres");
+        styleInput(txtPassword);
+        limitLength(txtPassword, 72);
 
         lblFeedback = new Label();
         lblFeedback.setWrapText(true);
@@ -164,7 +173,7 @@ public class LoginFrame extends Application {
         );
         hideFeedback();
 
-        form.getChildren().addAll(lblLogin, txtLogin, lblFeedback);
+        form.getChildren().addAll(lblLogin, txtLogin, lblPassword, txtPassword, lblFeedback);
         return form;
     }
 
@@ -203,9 +212,21 @@ public class LoginFrame extends Application {
     }
 
     private Label createFieldLabel(String text) {
-        Label label = new Label(text);
+        return createFieldLabel(text, false);
+    }
+
+    private Label createFieldLabel(String text, boolean required) {
+        Label label = new Label(required ? text + " *" : text);
         label.setFont(Font.font("System", FontWeight.BOLD, 18));
         label.setStyle("-fx-text-fill: #244b68;");
+        return label;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setFont(Font.font("System", 15));
+        label.setStyle("-fx-text-fill: #6b7e90;");
         return label;
     }
 
@@ -232,8 +253,14 @@ public class LoginFrame extends Application {
     private void login() {
 
         String loginValue = txtLogin.getText().trim();
+        String passwordValue = txtPassword.getText();
         if (!loginValue.matches("^[A-Za-z0-9]{3,30}$")) {
             showFeedback("Ingrese un número de identificación o usuario válido. Use solo letras y números.");
+            return;
+        }
+
+        if (passwordValue == null || passwordValue.length() < 6 || passwordValue.length() > 72) {
+            showFeedback("La contraseña debe tener mínimo 6 caracteres y máximo 72.");
             return;
         }
 
@@ -241,6 +268,7 @@ public class LoginFrame extends Application {
         try {
             LoginRequest request = new LoginRequest();
             request.setLogin(loginValue);
+            request.setPassword(passwordValue);
 
             AuthResponse authResponse = authHttpClient.login(request);
             AuthSession.setCurrentUser(authResponse);
@@ -248,7 +276,7 @@ public class LoginFrame extends Application {
             openHomeByRole(authResponse);
             stage.close();
         } catch (Exception e) {
-            showFeedback("No fue posible iniciar sesión. Verifique que el servicio de autenticación esté disponible.");
+            showFeedback("No fue posible iniciar sesión. Verifique usuario y contraseña, o que el servicio esté disponible.");
             showError(e.getMessage());
         }
     }

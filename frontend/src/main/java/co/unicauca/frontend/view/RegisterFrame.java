@@ -15,6 +15,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.PasswordField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -47,6 +48,8 @@ public class RegisterFrame extends Application {
     private ComboBox<String> cbGender;
     private DatePicker dpBirthDate;
     private TextField txtEmail;
+    private PasswordField txtPassword;
+    private PasswordField txtConfirmPassword;
     private Label lblFeedback;
     private Stage stage;
 
@@ -82,7 +85,8 @@ public class RegisterFrame extends Application {
 
 
 
-        card.getChildren().addAll(title, subtitle, createForm(), createActions());
+        Label requiredInfo = createRequiredInfoLabel();
+        card.getChildren().addAll(title, subtitle, requiredInfo, createForm(), createActions());
 
         ScrollPane scrollPane = new ScrollPane(card);
         scrollPane.setFitToWidth(true);
@@ -168,6 +172,16 @@ public class RegisterFrame extends Application {
         txtEmail.setPromptText("Opcional, ejemplo: correo@dominio.com");
         styleInput(txtEmail);
 
+        txtPassword = new PasswordField();
+        txtPassword.setPromptText("Mínimo 6 caracteres");
+        styleInput(txtPassword);
+        limitLength(txtPassword, 72);
+
+        txtConfirmPassword = new PasswordField();
+        txtConfirmPassword.setPromptText("Repita la contraseña");
+        styleInput(txtConfirmPassword);
+        limitLength(txtConfirmPassword, 72);
+
         lblFeedback = new Label();
         lblFeedback.setWrapText(true);
         lblFeedback.setMinHeight(Region.USE_PREF_SIZE);
@@ -180,25 +194,29 @@ public class RegisterFrame extends Application {
         );
         hideFeedback();
 
-        form.add(createFieldLabel("Número de documento"), 0, 0);
+        form.add(createFieldLabel("Número de documento", true), 0, 0);
         form.add(txtDocumentNumber, 1, 0);
-        form.add(createFieldLabel("Primer nombre"), 0, 2);
+        form.add(createFieldLabel("Primer nombre", true), 0, 2);
         form.add(txtFirstName, 1, 2);
         form.add(createFieldLabel("Segundo nombre"), 0, 3);
         form.add(txtSecondName, 1, 3);
-        form.add(createFieldLabel("Primer apellido"), 0, 4);
+        form.add(createFieldLabel("Primer apellido", true), 0, 4);
         form.add(txtFirstLastName, 1, 4);
         form.add(createFieldLabel("Segundo apellido"), 0, 5);
         form.add(txtSecondLastName, 1, 5);
-        form.add(createFieldLabel("Celular"), 0, 6);
+        form.add(createFieldLabel("Celular", true), 0, 6);
         form.add(txtPhone, 1, 6);
-        form.add(createFieldLabel("Género"), 0, 7);
+        form.add(createFieldLabel("Género", true), 0, 7);
         form.add(cbGender, 1, 7);
         form.add(createFieldLabel("Fecha de nacimiento"), 0, 8);
         form.add(dpBirthDate, 1, 8);
         form.add(createFieldLabel("Correo electrónico"), 0, 9);
         form.add(txtEmail, 1, 9);
-        form.add(lblFeedback, 0, 10, 2, 1);
+        form.add(createFieldLabel("Contraseña", true), 0, 10);
+        form.add(txtPassword, 1, 10);
+        form.add(createFieldLabel("Confirmar contraseña", true), 0, 11);
+        form.add(txtConfirmPassword, 1, 11);
+        form.add(lblFeedback, 0, 12, 2, 1);
 
         return form;
     }
@@ -236,9 +254,21 @@ public class RegisterFrame extends Application {
     }
 
     private Label createFieldLabel(String text) {
-        Label label = new Label(text);
+        return createFieldLabel(text, false);
+    }
+
+    private Label createFieldLabel(String text, boolean required) {
+        Label label = new Label(required ? text + " *" : text);
         label.setFont(Font.font("System", FontWeight.BOLD, 18));
         label.setStyle("-fx-text-fill: #244b68;");
+        return label;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setFont(Font.font("System", 15));
+        label.setStyle("-fx-text-fill: #6b7e90;");
         return label;
     }
 
@@ -280,6 +310,14 @@ public class RegisterFrame extends Application {
         });
     }
 
+    private void limitLength(TextField field, int maxLength) {
+        field.textProperty().addListener((obs, oldValue, newValue) -> {
+            if (newValue != null && newValue.length() > maxLength) {
+                field.setText(newValue.substring(0, maxLength));
+            }
+        });
+    }
+
     private void register() {
         List<String> errors = validateForm();
         if (!errors.isEmpty()) {
@@ -297,14 +335,15 @@ public class RegisterFrame extends Application {
                     txtPhone.getText().trim(),
                     cbGender.getValue(),
                     dpBirthDate.getValue(),
-                    cleanOptional(txtEmail.getText())
+                    cleanOptional(txtEmail.getText()),
+                    txtPassword.getText()
             );
 
             authHttpClient.register(request);
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Registro exitoso");
             alert.setHeaderText("Usuario creado correctamente");
-            alert.setContentText("Ahora puede iniciar sesión con su número de documento.");
+            alert.setContentText("Ahora puede iniciar sesión con su número de documento y la contraseña registrada.");
             alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
             alert.showAndWait();
             openLogin();
@@ -338,6 +377,8 @@ public class RegisterFrame extends Application {
         String gender = cbGender.getValue();
         LocalDate birthDate = dpBirthDate.getValue();
         String email = txtEmail.getText().trim();
+        String password = txtPassword.getText();
+        String confirmPassword = txtConfirmPassword.getText();
 
         if (!isDigitsInRange(document, 6, 15)) {
             errors.add("El número de documento debe tener entre 6 y 15 dígitos.");
@@ -373,6 +414,14 @@ public class RegisterFrame extends Application {
 
         if (!email.isBlank() && !EMAIL_PATTERN.matcher(email).matches()) {
             errors.add("El correo electrónico no tiene un formato válido.");
+        }
+
+        if (password == null || password.length() < 6 || password.length() > 72) {
+            errors.add("La contraseña debe tener mínimo 6 caracteres y máximo 72.");
+        }
+
+        if (confirmPassword == null || !confirmPassword.equals(password)) {
+            errors.add("La confirmación de contraseña no coincide.");
         }
 
         return errors;

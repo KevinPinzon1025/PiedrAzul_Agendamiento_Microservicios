@@ -342,6 +342,7 @@ public class ScheduleAppointmentFrame extends Application {
         card.getChildren().addAll(
                 title,
                 subtitle,
+                createRequiredInfoLabel(),
                 createTopActions(),
                 createFormGrid(),
                 createBottomActions(),
@@ -509,17 +510,18 @@ public class ScheduleAppointmentFrame extends Application {
                         "-fx-padding: 12;"
         );
 
-        form.add(createFieldBox("Paciente", cbPatient), 0, 0);
+        form.add(createFieldBox("Paciente", true, cbPatient), 0, 0);
 
-        form.add(createFieldBox("Profesional", cbProfessional), 1, 0);
+        form.add(createFieldBox("Profesional", true, cbProfessional), 1, 0);
 
-        form.add(createFieldBox("Fecha", datePicker), 0, 1);
+        form.add(createFieldBox("Fecha", true, datePicker), 0, 1);
 
-        form.add(createFieldBox("Hora", cbTime), 1, 1);
+        form.add(createFieldBox("Hora", true, cbTime), 1, 1);
 
         form.add(
                 createFieldBox(
                         "Motivo de la consulta",
+                        true,
                         txtMotivo
                 ),
                 0,
@@ -571,8 +573,16 @@ public class ScheduleAppointmentFrame extends Application {
             String labelText,
             Control field
     ) {
+        return createFieldBox(labelText, false, field);
+    }
 
-        Label label = new Label(labelText);
+    private VBox createFieldBox(
+            String labelText,
+            boolean required,
+            Control field
+    ) {
+
+        Label label = new Label(required ? labelText + " *" : labelText);
 
         label.setFont(
                 Font.font(
@@ -594,6 +604,14 @@ public class ScheduleAppointmentFrame extends Application {
         );
 
         return box;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setFont(Font.font("System", 15));
+        label.setStyle("-fx-text-fill: #6b7e90;");
+        return label;
     }
 
     private HBox createBottomActions() {

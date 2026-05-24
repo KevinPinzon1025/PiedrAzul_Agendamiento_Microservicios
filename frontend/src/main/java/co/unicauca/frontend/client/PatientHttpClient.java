@@ -11,7 +11,7 @@ import java.net.http.HttpResponse;
 public class PatientHttpClient {
 
     private static final String BASE_URL =
-            "http://localhost:8082/api/patients";
+            "http://localhost:8084/api/patients";
 
     private final HttpClient client =
             HttpClient.newHttpClient();

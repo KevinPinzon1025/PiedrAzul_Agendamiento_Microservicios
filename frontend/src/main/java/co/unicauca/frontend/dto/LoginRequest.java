@@ -2,6 +2,7 @@ package co.unicauca.frontend.dto;
 
 public class LoginRequest {
     private String login;
+    private String password;
 
     public LoginRequest() {
     }
@@ -12,6 +13,14 @@ public class LoginRequest {
 
     public void setLogin(String login) {
         this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 }

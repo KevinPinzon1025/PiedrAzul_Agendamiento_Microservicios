@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 public class AppointmentHttpClient {
 
-    private final String BASE_URL = "http://localhost:8080/appointment";
+    private final String BASE_URL = "http://localhost:8083/appointment";
     private final HttpClient client = HttpClient.newHttpClient();
 
     private List<PatientDTO> patientCache;

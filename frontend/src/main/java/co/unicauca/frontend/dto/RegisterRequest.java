@@ -12,13 +12,14 @@ public class RegisterRequest {
     private String gender;
     private LocalDate birthDate;
     private String email;
+    private String password;
 
     public RegisterRequest() {
     }
 
     public RegisterRequest(String documentNumber, String firstName, String secondName,
                            String firstLastName, String secondLastName, String phone, String gender,
-                           LocalDate birthDate, String email) {
+                           LocalDate birthDate, String email, String password) {
         this.documentNumber = documentNumber;
         this.firstName = firstName;
         this.secondName = secondName;
@@ -28,6 +29,7 @@ public class RegisterRequest {
         this.gender = gender;
         this.birthDate = birthDate;
         this.email = email;
+        this.password = password;
     }
 
     public String getDocumentNumber() {
@@ -100,5 +102,13 @@ public class RegisterRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

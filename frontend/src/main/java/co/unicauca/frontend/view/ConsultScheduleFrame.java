@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -66,7 +67,12 @@ public class ConsultScheduleFrame {
 
         VBox modal = createModal();
 
-        root.getChildren().add(modal);
+        ScrollPane scrollPane = new ScrollPane(modal);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+
+        root.getChildren().add(scrollPane);
 
         Scene scene =
                 new Scene(root, 800, 550);

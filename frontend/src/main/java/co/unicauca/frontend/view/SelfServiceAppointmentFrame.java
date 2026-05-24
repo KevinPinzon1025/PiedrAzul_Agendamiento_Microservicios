@@ -44,7 +44,11 @@ public class SelfServiceAppointmentFrame extends Application {
                 createHelpPanel()
         );
 
-        root.setCenter(mainContent);
+        ScrollPane scrollPane = new ScrollPane(mainContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setStyle("-fx-background-color: #f4f6fb; -fx-background: #f4f6fb;");
+        root.setCenter(scrollPane);
 
         Scene scene = new Scene(root, 1100, 650);
 
@@ -149,20 +153,22 @@ public class SelfServiceAppointmentFrame extends Application {
 
         txtMotivo.setWrapText(true);
 
-        grid.add(new Label("Profesional:"), 0, 0);
+        Label requiredInfo = createRequiredInfoLabel();
+
+        grid.add(createRequiredLabel("Profesional"), 0, 0);
 
         grid.add(cbProfessional, 0, 1);
 
-        grid.add(new Label("Fecha deseada:"), 1, 0);
+        grid.add(createRequiredLabel("Fecha deseada"), 1, 0);
 
         grid.add(datePicker, 1, 1);
 
-        grid.add(new Label("Hora:"), 0, 2);
+        grid.add(createRequiredLabel("Hora"), 0, 2);
 
         grid.add(cbTime, 0, 3);
 
         grid.add(
-                new Label("Motivo de consulta:"),
+                createRequiredLabel("Motivo de consulta"),
                 0,
                 4,
                 2,
@@ -241,6 +247,7 @@ public class SelfServiceAppointmentFrame extends Application {
 
         card.getChildren().addAll(
                 title,
+                requiredInfo,
                 grid,
                 actions,
                 lblFeedback
@@ -249,6 +256,19 @@ public class SelfServiceAppointmentFrame extends Application {
         controller.setupHelpListeners();
 
         return card;
+    }
+
+    private Label createRequiredLabel(String text) {
+        Label label = new Label(text + " *");
+        label.setStyle("-fx-font-weight: bold; -fx-text-fill: #244b68;");
+        return label;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setStyle("-fx-text-fill: #6b7e90;");
+        return label;
     }
 
     private Node createHelpPanel() {

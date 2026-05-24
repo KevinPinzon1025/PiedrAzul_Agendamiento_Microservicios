@@ -12,6 +12,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -86,12 +87,18 @@ public class PatientRegistrationDialog {
 
         root.getChildren().addAll(
                 title,
+                createRequiredInfoLabel(),
                 createForm(),
                 lblFeedback,
                 createActions()
         );
 
-        return new Scene(root, 780, 560);
+        ScrollPane scrollPane = new ScrollPane(root);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPannable(true);
+        scrollPane.setStyle("-fx-background-color: white; -fx-background: white;");
+
+        return new Scene(scrollPane, 780, 560);
     }
 
     private GridPane createForm() {
@@ -134,6 +141,13 @@ public class PatientRegistrationDialog {
         form.add(dpBirthDate, 0, 3);
 
         return form;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setStyle("-fx-text-fill: #6b7e90;");
+        return label;
     }
 
     private TextField createTextField(String prompt) {

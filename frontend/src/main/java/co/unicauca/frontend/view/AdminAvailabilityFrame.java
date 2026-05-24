@@ -195,8 +195,10 @@ public class AdminAvailabilityFrame extends Application {
         card.getChildren().addAll(
                 title,
                 subtitle,
+                createRequiredInfoLabel(),
                 createFieldBox(
                         "Profesional",
+                        true,
                         cbProfessional
                 ),
                 btnAddRow,
@@ -307,18 +309,22 @@ public class AdminAvailabilityFrame extends Application {
         line.getChildren().addAll(
                 createFieldBox(
                         "Día",
+                        true,
                         row.cbDay
                 ),
                 createFieldBox(
                         "Hora inicio",
+                        true,
                         row.cbStartHour
                 ),
                 createFieldBox(
                         "Hora fin",
+                        true,
                         row.cbEndHour
                 ),
                 createFieldBox(
                         "Duración cita",
+                        true,
                         row.cbDuration
                 ),
                 btnDelete
@@ -360,9 +366,17 @@ public class AdminAvailabilityFrame extends Application {
             String labelText,
             Control field
     ) {
+        return createFieldBox(labelText, false, field);
+    }
+
+    private VBox createFieldBox(
+            String labelText,
+            boolean required,
+            Control field
+    ) {
 
         Label label =
-                new Label(labelText);
+                new Label(required ? labelText + " *" : labelText);
 
         label.setFont(
                 Font.font(
@@ -385,6 +399,14 @@ public class AdminAvailabilityFrame extends Application {
         );
 
         return box;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setFont(Font.font("System", 15));
+        label.setStyle("-fx-text-fill: #6b7e90;");
+        return label;
     }
 
     private void styleField(Control control) {

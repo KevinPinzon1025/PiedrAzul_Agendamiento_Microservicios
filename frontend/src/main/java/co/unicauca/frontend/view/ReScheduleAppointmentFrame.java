@@ -170,6 +170,7 @@ public class ReScheduleAppointmentFrame {
 
         card.getChildren().addAll(
                 title,
+                createRequiredInfoLabel(),
                 createTopActions(),
                 createFormGrid(),
                 createBottomActions(),
@@ -300,6 +301,7 @@ public class ReScheduleAppointmentFrame {
         form.add(
                 createFieldBox(
                         "Nueva fecha",
+                        true,
                         datePicker
                 ),
                 0,
@@ -309,6 +311,7 @@ public class ReScheduleAppointmentFrame {
         form.add(
                 createFieldBox(
                         "Nuevo horario",
+                        true,
                         cbTime
                 ),
                 1,
@@ -369,8 +372,16 @@ public class ReScheduleAppointmentFrame {
             String labelText,
             Control field
     ) {
+        return createFieldBox(labelText, false, field);
+    }
 
-        Label label = new Label(labelText);
+    private VBox createFieldBox(
+            String labelText,
+            boolean required,
+            Control field
+    ) {
+
+        Label label = new Label(required ? labelText + " *" : labelText);
 
         label.setFont(
                 Font.font(
@@ -392,6 +403,14 @@ public class ReScheduleAppointmentFrame {
         );
 
         return box;
+    }
+
+    private Label createRequiredInfoLabel() {
+        Label label = new Label("Los campos con * son obligatorios.");
+        label.setWrapText(true);
+        label.setFont(Font.font("System", 15));
+        label.setStyle("-fx-text-fill: #6b7e90;");
+        return label;
     }
 
     private HBox createBottomActions() {

@@ -15,7 +15,7 @@ import java.util.List;
 public class AdminHttpClient {
 
     private final String BASE_URL =
-            "http://localhost:8080/appointment";
+            "http://localhost:8083/appointment";
 
     private final HttpClient client =
             HttpClient.newHttpClient();
