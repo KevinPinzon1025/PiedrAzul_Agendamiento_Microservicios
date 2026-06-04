@@ -1,0 +1,43 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/auth/**
+        - id: appointment-service
+          uri: ${APPOINTMENT_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/appointment/**
+        - id: patient-service
+          uri: ${PATIENT_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/patients/**
+        - id: professional-service-professionals
+          uri: ${PROFESSIONAL_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/professionals/**
+        - id: professional-service-types
+          uri: ${PROFESSIONAL_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/types/**
+        - id: report-service
+          uri: ${REPORT_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/reports/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${KEYCLOAK_JWK_SET_URI:http://localhost:8080/realms/sistema/protocol/openid-connect/certs}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO
