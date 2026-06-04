@@ -1,22 +1,18 @@
 package AuthService.service;
 
-import AuthService.dto.AuthResponse;
-import AuthService.dto.LoginRequest;
 import AuthService.dto.RegisterRequest;
-import AuthService.dto.TokenValidationResponse;
 import AuthService.dto.UserCreatedEvent;
 import AuthService.dto.UserResponse;
 import AuthService.entity.Role;
 import AuthService.entity.UserCredential;
 import AuthService.repository.UserCredentialRepository;
 import AuthService.messaging.AuthEventPublisher;
-import AuthService.util.JwtService;
 import AuthService.util.PasswordHasher;
 import AuthService.util.PasswordPolicy;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -26,9 +22,10 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserCredentialRepository repository;
-    private final JwtService jwtService;
     private final AuthEventPublisher authEventPublisher;
+    private final KeycloakAdminService keycloakAdminService;
 
+    @Transactional
     public UserResponse register(RegisterRequest request) {
 
         String documentNumber = request.getDocumentNumber().trim();
@@ -39,6 +36,9 @@ public class AuthService {
         if (!PasswordPolicy.isValid(request.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PasswordPolicy.errorMessage());
         }
+
+        // Primero se crea el usuario en Keycloak. Así el paciente puede iniciar sesión con su número de documento.
+        keycloakAdminService.createPatientUser(request);
 
         String salt = PasswordHasher.newSaltBase64();
         String passwordHash = PasswordHasher.hashBase64(request.getPassword().toCharArray(), salt);
@@ -65,41 +65,6 @@ public class AuthService {
         return mapToResponse(saved);
     }
 
-    public AuthResponse login(LoginRequest request) {
-        UserCredential user = repository.findByLogin(request.getLogin().trim())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
-
-        if (!user.isActive()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El usuario está inactivo");
-        }
-
-        if (user.getPasswordSalt() == null || user.getPasswordHash() == null
-                || !PasswordHasher.verify(request.getPassword(), user.getPasswordSalt(), user.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas");
-        }
-
-        return AuthResponse.builder()
-                .token(jwtService.generateToken(user))
-                .tokenType("Bearer")
-                .expiresIn(jwtService.getExpirationMs() / 1000)
-                .login(user.getLogin())
-                .role(user.getRole().name())
-                .fullName(buildFullName(user))
-                .build();
-    }
-
-    public TokenValidationResponse validateToken(String token) {
-        if (!jwtService.isTokenValid(token)) {
-            return TokenValidationResponse.builder().valid(false).build();
-        }
-
-        Claims claims = jwtService.extractAllClaims(token);
-        return TokenValidationResponse.builder()
-                .valid(true)
-                .login(claims.getSubject())
-                .role(String.valueOf(claims.get("role")))
-                .build();
-    }
 
     private UserCreatedEvent mapToUserCreatedEvent(UserCredential user) {
         return UserCreatedEvent.builder()
@@ -139,15 +104,6 @@ public class AuthService {
                 .build();
     }
 
-    private String buildFullName(UserCredential user) {
-        return String.join(" ",
-                cleanOptional(user.getFirstName()),
-                cleanOptional(user.getSecondName()),
-                cleanOptional(user.getFirstLastName()),
-                cleanOptional(user.getSecondLastName()))
-                .replaceAll("\\s+", " ")
-                .trim();
-    }
 
     private String cleanRequired(String value) {
         return value == null ? null : value.trim();

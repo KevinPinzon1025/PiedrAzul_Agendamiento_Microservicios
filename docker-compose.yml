@@ -84,18 +84,25 @@ services:
     container_name: piedrazul-auth-service
     environment:
       SERVER_PORT: 8082
-      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/authdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: "123"
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: sistema
+      KEYCLOAK_CLIENT_ID: sistema-desktop
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/sistema/protocol/openid-connect/certs
     ports:
       - "8082:8082"
     depends_on:
       - auth-db
       - rabbitmq
+      - keycloak
     networks:
       - piedrazul-net
 

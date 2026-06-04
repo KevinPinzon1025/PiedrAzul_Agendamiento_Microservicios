@@ -2,13 +2,13 @@ package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.client.PatientHttpClient;
 import co.unicauca.frontend.dto.CreatePatientRequestDTO;
+import co.unicauca.frontend.util.BirthDateSelector;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.control.TextField;
@@ -38,7 +38,7 @@ public class PatientRegistrationDialog {
     private TextField txtPhone;
     private TextField txtEmail;
     private ComboBox<String> cbGender;
-    private DatePicker dpBirthDate;
+    private BirthDateSelector dpBirthDate;
     private Label lblFeedback;
 
     public PatientRegistrationDialog(
@@ -124,10 +124,14 @@ public class PatientRegistrationDialog {
         cbGender.setPrefWidth(280);
         cbGender.setPrefHeight(46);
 
-        dpBirthDate = new DatePicker();
-        dpBirthDate.setPromptText("Fecha de nacimiento");
+        dpBirthDate = new BirthDateSelector();
         dpBirthDate.setPrefWidth(280);
         dpBirthDate.setPrefHeight(46);
+
+        VBox birthDateBox = new VBox(6);
+        Label birthDateLabel = new Label("Fecha de nacimiento *");
+        birthDateLabel.setStyle("-fx-text-fill: #102a43; -fx-font-weight: bold;");
+        birthDateBox.getChildren().addAll(birthDateLabel, dpBirthDate);
 
         form.add(txtDocumentNumber, 0, 0);
         form.add(txtFirstLastName, 1, 0);
@@ -138,7 +142,7 @@ public class PatientRegistrationDialog {
         form.add(txtPhone, 0, 2);
         form.add(txtEmail, 1, 2);
 
-        form.add(dpBirthDate, 0, 3);
+        form.add(birthDateBox, 0, 3);
 
         return form;
     }
@@ -310,8 +314,15 @@ public class PatientRegistrationDialog {
             return false;
         }
 
-        if (dpBirthDate.getValue() != null &&
-                !dpBirthDate.getValue().isBefore(LocalDate.now())) {
+        if (dpBirthDate.getValue() == null) {
+
+            showFeedback(
+                    "La fecha de nacimiento es obligatoria."
+            );
+            return false;
+        }
+
+        if (!dpBirthDate.getValue().isBefore(LocalDate.now())) {
 
             showFeedback(
                     "La fecha de nacimiento debe ser anterior a hoy."
