@@ -32,13 +32,31 @@ public class AuthHttpClient {
             );
 
             if (response.statusCode() != 201) {
-                throw new RuntimeException("Error registrando usuario: " + response.body());
+                throw new RuntimeException(registerErrorMessage(response.statusCode(), response.body()));
+            }
+
+            if (response.body() == null || response.body().isBlank()) {
+                return null;
             }
 
             return JsonUtil.fromJson(response.body(), UserResponse.class);
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("No fue posible conectar con el servicio de autenticación.");
         }
+    }
+
+    private String registerErrorMessage(int statusCode, String body) {
+        if (statusCode == 403 || statusCode == 409) {
+            return "Ya existe un usuario con ese número de documento.";
+        }
+
+        if (body != null && !body.isBlank()) {
+            return "No se pudo registrar: " + body;
+        }
+
+        return "No se pudo registrar. Código de respuesta: " + statusCode;
     }
 
     public AuthResponse login(LoginRequest request) {

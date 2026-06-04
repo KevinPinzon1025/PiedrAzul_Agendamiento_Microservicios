@@ -348,9 +348,26 @@ public class RegisterFrame extends Application {
             alert.showAndWait();
             openLogin();
         } catch (Exception e) {
-            showFeedback("No se pudo registrar. Revise los datos y confirme que el documento no exista.");
-            showError(e.getMessage());
+            showFeedback(cleanErrorMessage(e));
         }
+    }
+
+    private String cleanErrorMessage(Exception exception) {
+        Throwable current = exception;
+
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+
+        String message = current.getMessage();
+
+        if (message == null || message.isBlank()) {
+            return "No se pudo registrar. Revise los datos e intente nuevamente.";
+        }
+
+        return message
+                .replace("java.lang.RuntimeException: ", "")
+                .trim();
     }
 
     private void showFeedback(String message) {
