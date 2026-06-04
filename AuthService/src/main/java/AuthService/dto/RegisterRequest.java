@@ -2,6 +2,7 @@ package AuthService.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -45,6 +46,7 @@ public class RegisterRequest {
     @Pattern(regexp = "^(Hombre|Mujer|Otro)$", message = "El género debe ser Hombre, Mujer u Otro")
     private String gender;
 
+    @NotNull(message = "La fecha de nacimiento es obligatoria")
     @Past(message = "La fecha de nacimiento debe ser anterior a la fecha actual")
     private LocalDate birthDate;
 

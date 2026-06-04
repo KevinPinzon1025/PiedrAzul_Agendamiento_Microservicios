@@ -2,6 +2,7 @@ package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.client.AuthHttpClient;
 import co.unicauca.frontend.dto.RegisterRequest;
+import co.unicauca.frontend.util.BirthDateSelector;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,8 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.DateCell;
-import javafx.scene.control.DatePicker;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -46,7 +45,7 @@ public class RegisterFrame extends Application {
     private TextField txtSecondLastName;
     private TextField txtPhone;
     private ComboBox<String> cbGender;
-    private DatePicker dpBirthDate;
+    private BirthDateSelector dpBirthDate;
     private TextField txtEmail;
     private PasswordField txtPassword;
     private PasswordField txtConfirmPassword;
@@ -152,21 +151,10 @@ public class RegisterFrame extends Application {
                         "-fx-font-size: 18px;"
         );
 
-        dpBirthDate = new DatePicker();
-        dpBirthDate.setPromptText("Opcional, no puede ser futura");
+        dpBirthDate = new BirthDateSelector();
         dpBirthDate.setPrefWidth(360);
         dpBirthDate.setPrefHeight(50);
-        dpBirthDate.setStyle("-fx-font-size: 18px;");
-        dpBirthDate.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                if (!empty && !date.isBefore(LocalDate.now())) {
-                    setDisable(true);
-                    setStyle("-fx-background-color: #eeeeee; -fx-text-fill: #999;");
-                }
-            }
-        });
+        dpBirthDate.setStyle("-fx-font-size: 18px; -fx-background-color: #f8fbff; -fx-border-color: #c8d9eb; -fx-border-radius: 14; -fx-background-radius: 14; -fx-padding: 4 8 4 8;");
 
         txtEmail = new TextField();
         txtEmail.setPromptText("Opcional, ejemplo: correo@dominio.com");
@@ -208,7 +196,7 @@ public class RegisterFrame extends Application {
         form.add(txtPhone, 1, 6);
         form.add(createFieldLabel("Género", true), 0, 7);
         form.add(cbGender, 1, 7);
-        form.add(createFieldLabel("Fecha de nacimiento"), 0, 8);
+        form.add(createFieldLabel("Fecha de nacimiento", true), 0, 8);
         form.add(dpBirthDate, 1, 8);
         form.add(createFieldLabel("Correo electrónico"), 0, 9);
         form.add(txtEmail, 1, 9);
@@ -348,9 +336,26 @@ public class RegisterFrame extends Application {
             alert.showAndWait();
             openLogin();
         } catch (Exception e) {
-            showFeedback("No se pudo registrar. Revise los datos y confirme que el documento no exista.");
-            showError(e.getMessage());
+            showFeedback(cleanErrorMessage(e));
         }
+    }
+
+    private String cleanErrorMessage(Exception exception) {
+        Throwable current = exception;
+
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+
+        String message = current.getMessage();
+
+        if (message == null || message.isBlank()) {
+            return "No se pudo registrar. Revise los datos e intente nuevamente.";
+        }
+
+        return message
+                .replace("java.lang.RuntimeException: ", "")
+                .trim();
     }
 
     private void showFeedback(String message) {
@@ -408,7 +413,9 @@ public class RegisterFrame extends Application {
             errors.add("Debe seleccionar un género válido.");
         }
 
-        if (birthDate != null && !birthDate.isBefore(LocalDate.now())) {
+        if (birthDate == null) {
+            errors.add("La fecha de nacimiento es obligatoria.");
+        } else if (!birthDate.isBefore(LocalDate.now())) {
             errors.add("La fecha de nacimiento debe ser anterior a la fecha actual.");
         }
 

@@ -1,10 +1,12 @@
 package AuthService.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,5 +28,14 @@ public class ValidationExceptionHandler {
         response.put("message", "Datos inválidos");
         response.put("errors", errors);
         return response;
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException exception) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("status", exception.getStatusCode().value());
+        response.put("error", exception.getStatusCode().toString());
+        response.put("message", exception.getReason());
+        return ResponseEntity.status(exception.getStatusCode()).body(response);
     }
 }

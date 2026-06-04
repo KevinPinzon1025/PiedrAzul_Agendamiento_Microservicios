@@ -2,6 +2,7 @@
 package co.unicauca.frontend.controller;
 
 import co.unicauca.frontend.client.AppointmentHttpClient;
+import co.unicauca.frontend.client.ReportHttpClient;
 import co.unicauca.frontend.dto.AppointmentDTO;
 import co.unicauca.frontend.mapper.AppointmentMapper;
 import co.unicauca.frontend.viewmodel.AppointmentViewModel;
@@ -27,15 +28,24 @@ public class SearchAppointmentController {
 
         void setTotal(int total);
 
+        void setReportDownloadEnabled(boolean enabled);
+
+        void saveCsvReport(String suggestedFilename, byte[] content);
+
         void showAlert(String message);
     }
 
     private final View view;
     private final AppointmentHttpClient apiClient;
+    private final ReportHttpClient reportClient;
+
+    private String lastSearchedProfessional;
+    private LocalDate lastSearchedDate;
 
     public SearchAppointmentController(View view) {
         this.view = view;
         this.apiClient = new AppointmentHttpClient();
+        this.reportClient = new ReportHttpClient();
     }
 
     public void onInit() {
@@ -43,6 +53,7 @@ public class SearchAppointmentController {
             view.setProfessionals(apiClient.getAllProfessionals());
             view.clearAppointments();
             view.setTotal(0);
+            clearReportSearch();
 
         } catch (Exception e) {
             view.showAlert("Error cargando profesionales.");
@@ -53,6 +64,7 @@ public class SearchAppointmentController {
     public void onSearch() {
 
         view.clearAppointments();
+        clearReportSearch();
 
         String professional = view.getSelectedProfessional();
 
@@ -88,6 +100,9 @@ public class SearchAppointmentController {
             view.setAppointments(vmList);
 
             view.setTotal(vmList.size());
+            lastSearchedProfessional = professional;
+            lastSearchedDate = date;
+            view.setReportDownloadEnabled(true);
 
             if (vmList.isEmpty()) {
 
@@ -104,5 +119,38 @@ public class SearchAppointmentController {
                     "Error consultando citas."
             );
         }
+    }
+
+    public void onDownloadCsv() {
+        if (lastSearchedProfessional == null || lastSearchedDate == null) {
+            return;
+        }
+
+        try {
+            ReportHttpClient.CsvReport report =
+                    reportClient.downloadAppointmentCsv(
+                            lastSearchedProfessional,
+                            lastSearchedDate
+                    );
+
+            view.saveCsvReport(
+                    report.getFilename(),
+                    report.getContent()
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            view.showAlert("Error descargando el reporte CSV.");
+        }
+    }
+
+    public void onFiltersChanged() {
+        clearReportSearch();
+    }
+
+    private void clearReportSearch() {
+        lastSearchedProfessional = null;
+        lastSearchedDate = null;
+        view.setReportDownloadEnabled(false);
     }
 }

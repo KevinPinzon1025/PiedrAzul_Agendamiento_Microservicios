@@ -1,6 +1,8 @@
 package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.controller.AdminAvailabilityController;
+import co.unicauca.frontend.dto.AuthResponse;
+import co.unicauca.frontend.dto.AuthSession;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,6 +19,7 @@ import java.util.List;
 public class AdminAvailabilityFrame extends Application {
 
     private AdminAvailabilityController controller;
+    private Stage stage;
 
     public ComboBox<String> cbProfessional;
 
@@ -30,6 +33,7 @@ public class AdminAvailabilityFrame extends Application {
     @Override
     public void start(Stage stage) {
 
+        this.stage = stage;
         controller =
                 new AdminAvailabilityController(this);
 
@@ -39,6 +43,8 @@ public class AdminAvailabilityFrame extends Application {
         root.setStyle(
                 "-fx-background-color: #eef5fb;"
         );
+
+        root.setTop(createHeader());
 
         VBox wrapper =
                 new VBox(20);
@@ -235,6 +241,132 @@ public class AdminAvailabilityFrame extends Application {
         addRow();
 
         controller.initData();
+    }
+
+    private HBox createHeader() {
+
+        HBox header =
+                new HBox(16);
+
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        header.setPadding(
+                new Insets(18, 30, 18, 30)
+        );
+
+        header.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-border-color: #d6e3f2;" +
+                        "-fx-border-width: 0 0 1 0;"
+        );
+
+        Label brand =
+                new Label("Administrador - Piedrazul");
+
+        brand.setFont(
+                Font.font(
+                        "System",
+                        FontWeight.BOLD,
+                        24
+                )
+        );
+
+        brand.setStyle(
+                "-fx-text-fill: #1f6fb2;"
+        );
+
+        Region spacer =
+                new Region();
+
+        HBox.setHgrow(
+                spacer,
+                Priority.ALWAYS
+        );
+
+        VBox userBox =
+                new VBox(3);
+
+        userBox.setAlignment(Pos.CENTER_RIGHT);
+
+        AuthResponse currentUser =
+                AuthSession.getCurrentUser();
+
+        String displayName =
+                currentUser != null
+                        ? currentUser.getDisplayName()
+                        : "Administrador";
+
+        String role =
+                currentUser != null && currentUser.getRole() != null
+                        ? currentUser.getRole()
+                        : "";
+
+        Label lblUser =
+                new Label(displayName);
+
+        lblUser.setStyle(
+                "-fx-text-fill: #204968;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        Label lblRole =
+                new Label(role.isBlank() ? "Sesión iniciada" : "Rol: " + role);
+
+        lblRole.setStyle(
+                "-fx-text-fill: #5f7387;" +
+                        "-fx-font-size: 14px;"
+        );
+
+        userBox.getChildren().addAll(
+                lblUser,
+                lblRole
+        );
+
+        Button btnLogout =
+                new Button("Cerrar sesión");
+
+        btnLogout.setPrefHeight(40);
+
+        btnLogout.setStyle(
+                "-fx-background-color: #e8f1fb;" +
+                        "-fx-text-fill: #1f6fb2;" +
+                        "-fx-background-radius: 14;" +
+                        "-fx-font-size: 15px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-cursor: hand;"
+        );
+
+        btnLogout.setOnAction(
+                e -> logout()
+        );
+
+        header.getChildren().addAll(
+                brand,
+                spacer,
+                userBox,
+                btnLogout
+        );
+
+        return header;
+    }
+
+    private void logout() {
+        try {
+            AuthSession.clear();
+            new LoginFrame().start(new Stage());
+            stage.close();
+        } catch (Exception e) {
+            showAlert("No fue posible cerrar sesión.");
+        }
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Sesión");
+        alert.setHeaderText("Resultado");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public void addRow() {
