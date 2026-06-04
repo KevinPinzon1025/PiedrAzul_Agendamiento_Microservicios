@@ -32,6 +32,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -45,6 +47,7 @@ public class SearchAppointmentFrame extends Application {
     private ComboBox<String> cbProfessional;
     private DatePicker datePicker;
     private TextField txtSearch;
+    private Button btnDownloadCsv;
 
     @Override
     public void start(Stage stage) {
@@ -180,6 +183,7 @@ public class SearchAppointmentFrame extends Application {
         txtSearch.setPromptText("Buscar por nombre del profesional");
         txtSearch.setPrefWidth(320);
         styleInput(txtSearch);
+        txtSearch.textProperty().addListener((obs, oldValue, newValue) -> controller.onFiltersChanged());
 
         Button btnSearch = new Button("Buscar");
         btnSearch.setPrefHeight(50);
@@ -217,12 +221,14 @@ public class SearchAppointmentFrame extends Application {
         cbProfessional.setPrefWidth(320);
         cbProfessional.setPrefHeight(50);
         cbProfessional.setStyle("-fx-font-size: 17px;");
+        cbProfessional.valueProperty().addListener((obs, oldValue, newValue) -> controller.onFiltersChanged());
 
         datePicker = new DatePicker();
         datePicker.setPrefWidth(210);
         datePicker.setPrefHeight(50);
         datePicker.setValue(LocalDate.now());
         datePicker.setStyle("-fx-font-size: 17px;");
+        datePicker.valueProperty().addListener((obs, oldValue, newValue) -> controller.onFiltersChanged());
 
         Button btnConsultar = new Button("Aplicar filtros");
         btnConsultar.setPrefHeight(50);
@@ -235,7 +241,19 @@ public class SearchAppointmentFrame extends Application {
         );
         btnConsultar.setOnAction(e -> controller.onSearch());
 
-        filters.getChildren().addAll(cbProfessional, datePicker, btnConsultar);
+        btnDownloadCsv = new Button("Descargar CSV");
+        btnDownloadCsv.setPrefHeight(50);
+        btnDownloadCsv.setFont(Font.font("System", FontWeight.BOLD, 18));
+        btnDownloadCsv.setDisable(true);
+        btnDownloadCsv.setStyle(
+                "-fx-background-color: #1f6fb2;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 14;" +
+                        "-fx-padding: 0 24 0 24;"
+        );
+        btnDownloadCsv.setOnAction(e -> controller.onDownloadCsv());
+
+        filters.getChildren().addAll(cbProfessional, datePicker, btnConsultar, btnDownloadCsv);
 
         VBox card = new VBox(16);
         card.setPadding(new Insets(22));
@@ -410,6 +428,35 @@ public class SearchAppointmentFrame extends Application {
         @Override
         public void setTotal(int total) {
             lblTotal.setText("Total de citas: " + total);
+        }
+
+        @Override
+        public void setReportDownloadEnabled(boolean enabled) {
+            btnDownloadCsv.setDisable(!enabled);
+        }
+
+        @Override
+        public void saveCsvReport(String suggestedFilename, byte[] content) {
+            javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+            fileChooser.setTitle("Guardar reporte CSV");
+            fileChooser.setInitialFileName(suggestedFilename);
+            fileChooser.getExtensionFilters().add(
+                    new javafx.stage.FileChooser.ExtensionFilter("Archivos CSV", "*.csv")
+            );
+
+            File selectedFile = fileChooser.showSaveDialog(stage);
+
+            if (selectedFile == null) {
+                return;
+            }
+
+            try {
+                Files.write(selectedFile.toPath(), content);
+                showAlert("Reporte CSV descargado correctamente.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("No fue posible guardar el reporte CSV.");
+            }
         }
 
         @Override
