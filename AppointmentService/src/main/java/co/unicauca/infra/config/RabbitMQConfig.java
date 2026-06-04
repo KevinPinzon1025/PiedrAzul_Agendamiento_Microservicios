@@ -31,9 +31,11 @@ public class RabbitMQConfig {
     public static final String ROUTING_KEY = "appointment.created";
 
     public static final String PROFESSIONAL_CREATED_QUEUE = "professional.created.queue";
+    public static final String PROFESSIONAL_UPDATED_QUEUE = "professional.updated.queue";
 
     //esto si se hace aqui o en el que publica?
     public static final String PROFESSIONAL_CREATED_KEY = "professional.created";
+    public static final String PROFESSIONAL_UPDATED_KEY = "professional.updated";
     public static final String PROFESSIONAL_EXCHANGE = "piedrAzul.professional.exchange";
 
     public static final String PATIENT_CREATED_QUEUE = "patient.created.queue";
@@ -84,6 +86,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue professionalUpdatedQueue() {
+        return new Queue(PROFESSIONAL_UPDATED_QUEUE, true);
+    }
+
+    @Bean
     public Queue patientCreatedQueue() {
         return new Queue(PATIENT_CREATED_QUEUE, true);
     }
@@ -117,6 +124,14 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(professionalCreatedQueue)
                 .to(professionalExchange)
                 .with(PROFESSIONAL_CREATED_KEY);
+    }
+
+    @Bean
+    public Binding professionalUpdatedBinding(Queue professionalUpdatedQueue,
+                                              TopicExchange professionalExchange) {
+        return BindingBuilder.bind(professionalUpdatedQueue)
+                .to(professionalExchange)
+                .with(PROFESSIONAL_UPDATED_KEY);
     }
 
     @Bean
