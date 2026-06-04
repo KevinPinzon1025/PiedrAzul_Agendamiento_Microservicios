@@ -27,6 +27,10 @@ spring:
           uri: ${PROFESSIONAL_SERVICE_URL:http://localhost:8085}
           predicates:
             - Path=/types/**
+        - id: report-service
+          uri: ${REPORT_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/reports/**
   security:
     oauth2:
       resourceserver:

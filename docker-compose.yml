@@ -64,6 +64,20 @@ services:
     networks:
       - piedrazul-net
 
+  report-db:
+    image: postgres:16-alpine
+    container_name: piedrazul-report-db
+    environment:
+      POSTGRES_DB: reportdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123"
+    ports:
+      - "5435:5432"
+    volumes:
+      - report-db-data:/var/lib/postgresql/data
+    networks:
+      - piedrazul-net
+
   auth-service:
     build:
       context: ./AuthService
@@ -127,6 +141,30 @@ services:
     networks:
       - piedrazul-net
 
+  report-service:
+    build:
+      context: ./report-service
+    container_name: piedrazul-report-service
+    environment:
+      SERVER_PORT: 8086
+      SPRING_DATASOURCE_URL: jdbc:postgresql://report-db:5432/reportdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "123"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      PIEDRAZUL_REPORTS_OUTPUT_DIR: /app/generated-reports/appointments
+    ports:
+      - "8086:8086"
+    volumes:
+      - report-files:/app/generated-reports
+    depends_on:
+      - report-db
+      - rabbitmq
+    networks:
+      - piedrazul-net
+
   professional-service:
     build:
       context: ./professionalService
@@ -148,6 +186,7 @@ services:
       APPOINTMENT_SERVICE_URL: http://appointment-service:8083
       PATIENT_SERVICE_URL: http://patient-service:8084
       PROFESSIONAL_SERVICE_URL: http://professional-service:8085
+      REPORT_SERVICE_URL: http://report-service:8086
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/sistema/protocol/openid-connect/certs
     ports:
       - "8081:8081"
@@ -157,6 +196,7 @@ services:
       - appointment-service
       - patient-service
       - professional-service
+      - report-service
     networks:
       - piedrazul-net
 
@@ -164,6 +204,8 @@ volumes:
   auth-db-data:
   appointment-db-data:
   patient-db-data:
+  report-db-data:
+  report-files:
 
 networks:
   piedrazul-net:
