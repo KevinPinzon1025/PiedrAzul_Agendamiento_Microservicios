@@ -39,6 +39,35 @@ public class ProfessionalAvailabilityController {
         );
     }
 
+    @GetMapping("/availability")
+    public ResponseEntity<List<WorkingDayDTO>> listAvailability() {
+
+        return ResponseEntity.ok(
+                service.findAllConfiguredSlots()
+        );
+    }
+
+    @PutMapping("/availability/{id}")
+    public ResponseEntity<WorkingDayDTO> updateAvailability(
+            @PathVariable Long id,
+            @RequestBody WorkingDayDTO workingDay
+    ) {
+
+        return ResponseEntity.ok(
+                service.updateWorkingDay(id, workingDay)
+        );
+    }
+
+    @DeleteMapping("/availability/{id}")
+    public ResponseEntity<Void> deleteAvailability(
+            @PathVariable Long id
+    ) {
+
+        service.deleteWorkingDay(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{professionalId}/available-slots")
     public ResponseEntity<List<SlotResponseDTO>>
     getAvailableSlots(

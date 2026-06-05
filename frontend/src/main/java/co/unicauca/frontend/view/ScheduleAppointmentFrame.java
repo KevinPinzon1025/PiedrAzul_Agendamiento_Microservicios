@@ -27,7 +27,11 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class ScheduleAppointmentFrame extends Application {
 
@@ -41,6 +45,8 @@ public class ScheduleAppointmentFrame extends Application {
     public Label lblFeedback;
 
     private Stage stage;
+    private List<String> allPatients = new ArrayList<>();
+    private boolean updatingPatientFilter;
 
     @Override
     public void start(Stage stage) {
@@ -475,7 +481,12 @@ public class ScheduleAppointmentFrame extends Application {
 
         cbPatient = new ComboBox<>();
         cbPatient.setPromptText("Seleccione un paciente");
+        cbPatient.setEditable(true);
         styleField(cbPatient);
+        cbPatient.getEditor().textProperty().addListener(
+                (obs, oldValue, newValue) ->
+                        updatePatientSuggestions(newValue)
+        );
 
         cbProfessional = new ComboBox<>();
         cbProfessional.setPromptText("Seleccione un profesional");
@@ -749,6 +760,130 @@ public class ScheduleAppointmentFrame extends Application {
                         "-fx-background-radius: 14;" +
                         "-fx-font-size: 17px;"
         );
+    }
+
+    public void setPatients(List<String> patients) {
+
+        allPatients = new ArrayList<>(patients);
+
+        cbPatient.getItems().setAll(
+                patients
+        );
+    }
+
+    public void resetPatientFilter() {
+
+        updatingPatientFilter = true;
+
+        cbPatient.getSelectionModel()
+                .clearSelection();
+
+        cbPatient.getEditor()
+                .clear();
+
+        cbPatient.getItems()
+                .setAll(allPatients);
+
+        cbPatient.hide();
+
+        updatingPatientFilter = false;
+    }
+
+    private void updatePatientSuggestions(String text) {
+
+        if (updatingPatientFilter ||
+                cbPatient == null ||
+                allPatients == null) {
+
+            return;
+        }
+
+        String normalizedSearch =
+                normalize(text);
+
+        if (countNonBlankCharacters(normalizedSearch) < 2) {
+
+            updatePatientItems(
+                    allPatients,
+                    text
+            );
+
+            cbPatient.hide();
+
+            return;
+        }
+
+        List<String> matches =
+                allPatients.stream()
+                        .filter(patient ->
+                                normalize(patient)
+                                        .contains(normalizedSearch)
+                        )
+                        .toList();
+
+        updatePatientItems(
+                matches,
+                text
+        );
+
+        if (matches.isEmpty()) {
+
+            cbPatient.hide();
+
+        } else {
+
+            cbPatient.show();
+        }
+    }
+
+    private void updatePatientItems(
+            List<String> patients,
+            String editorText
+    ) {
+
+        updatingPatientFilter = true;
+
+        cbPatient.getItems()
+                .setAll(patients);
+
+        cbPatient.getEditor()
+                .setText(editorText);
+
+        cbPatient.getEditor()
+                .positionCaret(
+                        editorText == null
+                                ? 0
+                                : editorText.length()
+                );
+
+        updatingPatientFilter = false;
+    }
+
+    private int countNonBlankCharacters(String text) {
+
+        if (text == null) {
+
+            return 0;
+        }
+
+        return (int) text.chars()
+                .filter(ch -> !Character.isWhitespace(ch))
+                .count();
+    }
+
+    private String normalize(String value) {
+
+        if (value == null) {
+
+            return "";
+        }
+
+        return Normalizer.normalize(
+                        value.trim(),
+                        Normalizer.Form.NFD
+                )
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT);
     }
 
     private void logout() {

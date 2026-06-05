@@ -133,4 +133,134 @@ public class AdminHttpClient {
             throw new RuntimeException(e);
         }
     }
+
+    public List<WorkingDayDTO> getConfiguredAvailability() {
+
+        try {
+
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(
+                                    URI.create(
+                                            BASE_URL +
+                                                    "/agenda/availability"
+                                    )
+                            )
+                            .GET()
+                            .build();
+
+            HttpResponse<String> response =
+                    client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofString()
+                    );
+
+            if (response.statusCode() != 200) {
+
+                throw new RuntimeException(
+                        "Error consultando franjas: "
+                                + response.body()
+                );
+            }
+
+            return JsonUtil.fromJsonList(
+                    response.body(),
+                    WorkingDayDTO.class
+            );
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
+    public WorkingDayDTO updateAvailability(
+            Long id,
+            WorkingDayDTO workingDay
+    ) {
+
+        try {
+
+            String json =
+                    JsonUtil.toJson(workingDay);
+
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(
+                                    URI.create(
+                                            BASE_URL +
+                                                    "/agenda/availability/" +
+                                                    id
+                                    )
+                            )
+                            .header(
+                                    "Content-Type",
+                                    "application/json"
+                            )
+                            .PUT(
+                                    HttpRequest.BodyPublishers
+                                            .ofString(json)
+                            )
+                            .build();
+
+            HttpResponse<String> response =
+                    client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofString()
+                    );
+
+            if (response.statusCode() != 200) {
+
+                throw new RuntimeException(
+                        "Error actualizando franja: "
+                                + response.body()
+                );
+            }
+
+            return JsonUtil.fromJson(
+                    response.body(),
+                    WorkingDayDTO.class
+            );
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteAvailability(Long id) {
+
+        try {
+
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(
+                                    URI.create(
+                                            BASE_URL +
+                                                    "/agenda/availability/" +
+                                                    id
+                                    )
+                            )
+                            .DELETE()
+                            .build();
+
+            HttpResponse<String> response =
+                    client.send(
+                            request,
+                            HttpResponse.BodyHandlers.ofString()
+                    );
+
+            if (response.statusCode() != 204) {
+
+                throw new RuntimeException(
+                        "Error eliminando franja: "
+                                + response.body()
+                );
+            }
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
 }

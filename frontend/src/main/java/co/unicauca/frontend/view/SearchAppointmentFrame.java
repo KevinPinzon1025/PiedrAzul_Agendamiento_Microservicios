@@ -14,6 +14,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -35,7 +37,10 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.text.Normalizer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SearchAppointmentFrame extends Application {
 
@@ -48,6 +53,8 @@ public class SearchAppointmentFrame extends Application {
     private DatePicker datePicker;
     private TextField txtSearch;
     private Button btnDownloadCsv;
+    private ContextMenu professionalSuggestions;
+    private List<String> allProfessionals = new ArrayList<>();
 
     @Override
     public void start(Stage stage) {
@@ -183,7 +190,11 @@ public class SearchAppointmentFrame extends Application {
         txtSearch.setPromptText("Buscar por nombre del profesional");
         txtSearch.setPrefWidth(320);
         styleInput(txtSearch);
-        txtSearch.textProperty().addListener((obs, oldValue, newValue) -> controller.onFiltersChanged());
+        professionalSuggestions = new ContextMenu();
+        txtSearch.textProperty().addListener((obs, oldValue, newValue) -> {
+            controller.onFiltersChanged();
+            updateProfessionalSuggestions(newValue);
+        });
 
         Button btnSearch = new Button("Buscar");
         btnSearch.setPrefHeight(50);
@@ -365,6 +376,72 @@ public class SearchAppointmentFrame extends Application {
         alert.showAndWait();
     }
 
+    private void updateProfessionalSuggestions(String text) {
+        if (professionalSuggestions == null) {
+            return;
+        }
+
+        String normalizedSearch = normalize(text);
+        if (countNonBlankCharacters(normalizedSearch) < 2) {
+            professionalSuggestions.hide();
+            return;
+        }
+
+        List<String> matches = allProfessionals.stream()
+                .filter(name -> normalize(name).contains(normalizedSearch))
+                .toList();
+
+        if (matches.isEmpty()) {
+            professionalSuggestions.hide();
+            return;
+        }
+
+        professionalSuggestions.getItems().setAll(
+                matches.stream()
+                        .map(this::createProfessionalSuggestion)
+                        .toList()
+        );
+
+        if (!professionalSuggestions.isShowing()) {
+            professionalSuggestions.show(txtSearch, javafx.geometry.Side.BOTTOM, 0, 0);
+        }
+    }
+
+    private CustomMenuItem createProfessionalSuggestion(String professional) {
+        Label label = new Label(professional);
+        label.setMinWidth(txtSearch.getWidth() - 10);
+        label.setStyle("-fx-font-size: 16px; -fx-padding: 8 12 8 12;");
+
+        CustomMenuItem item = new CustomMenuItem(label, true);
+        item.setOnAction(e -> {
+            txtSearch.setText(professional);
+            cbProfessional.setValue(professional);
+            professionalSuggestions.hide();
+        });
+
+        return item;
+    }
+
+    private int countNonBlankCharacters(String text) {
+        if (text == null) {
+            return 0;
+        }
+
+        return (int) text.chars()
+                .filter(ch -> !Character.isWhitespace(ch))
+                .count();
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        return Normalizer.normalize(value.trim(), Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.ROOT);
+    }
+
     private void openRescheduleWindow(
             AppointmentDTO appointment
     ) {
@@ -397,6 +474,7 @@ public class SearchAppointmentFrame extends Application {
 
         @Override
         public void setProfessionals(List<String> professionals) {
+            allProfessionals = new ArrayList<>(professionals);
             cbProfessional.getItems().setAll(professionals);
         }
 

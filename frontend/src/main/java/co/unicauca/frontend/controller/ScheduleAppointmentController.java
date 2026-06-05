@@ -34,7 +34,7 @@ public class ScheduleAppointmentController {
             List<String> patients =
                     httpClient.getAllPatients();
 
-            view.cbPatient.getItems().setAll(
+            view.setPatients(
                     patients
             );
 
@@ -100,7 +100,9 @@ public class ScheduleAppointmentController {
         try {
 
             String patientName =
-                    view.cbPatient.getValue();
+                    view.cbPatient.isEditable()
+                            ? view.cbPatient.getEditor().getText()
+                            : view.cbPatient.getValue();
 
             String professionalName =
                     view.cbProfessional.getValue();
@@ -195,8 +197,7 @@ public class ScheduleAppointmentController {
 
     public void clearForm() {
 
-        view.cbPatient.getSelectionModel()
-                .clearSelection();
+        view.resetPatientFilter();
 
         view.cbProfessional.getSelectionModel()
                 .clearSelection();

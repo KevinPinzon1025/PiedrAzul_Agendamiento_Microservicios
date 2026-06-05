@@ -2,8 +2,10 @@
 package co.unicauca.frontend.view;
 
 import co.unicauca.frontend.controller.SelfServiceAppointmentController;
+import co.unicauca.frontend.dto.AppointmentDTO;
 import co.unicauca.frontend.dto.AuthResponse;
 import co.unicauca.frontend.dto.AuthSession;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,6 +17,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class SelfServiceAppointmentFrame extends Application {
 
@@ -27,6 +31,12 @@ public class SelfServiceAppointmentFrame extends Application {
     public TextArea txtMotivo;
     public Label lblFeedback;
     public Label lblHelpBox;
+    public Label lblMyAppointmentsFeedback;
+    public TableView<AppointmentDTO> tblMyAppointments;
+
+    private BorderPane root;
+    private Button btnScheduleTab;
+    private Button btnMyAppointmentsTab;
 
     @Override
     public void start(Stage stage) {
@@ -34,10 +44,69 @@ public class SelfServiceAppointmentFrame extends Application {
         this.stage = stage;
         this.controller = new SelfServiceAppointmentController(this);
 
-        BorderPane root = new BorderPane();
+        root = new BorderPane();
         root.setStyle("-fx-background-color: #f4f6fb;");
 
-        root.setTop(createHeader());
+        VBox topContainer = new VBox(12);
+        topContainer.setPadding(new Insets(15, 30, 0, 30));
+        topContainer.getChildren().addAll(
+                createHeader(),
+                createToolbar()
+        );
+
+        root.setTop(topContainer);
+        root.setCenter(createScheduleContent());
+
+        Scene scene = new Scene(root, 1100, 650);
+
+        stage.setScene(scene);
+
+        stage.setTitle(
+                "Autogestión de Citas - Servicios Médicos Piedrazul"
+        );
+
+        stage.show();
+
+        controller.initData();
+    }
+
+    private Node createToolbar() {
+
+        HBox toolbar = new HBox(20);
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+        toolbar.setPadding(new Insets(0, 0, 8, 0));
+
+        btnScheduleTab = createNavButton("Agendar cita", true);
+        btnMyAppointmentsTab = createNavButton("Mis citas", false);
+
+        btnScheduleTab.setOnAction(e -> showScheduleTab());
+        btnMyAppointmentsTab.setOnAction(e -> showMyAppointmentsTab());
+
+        toolbar.getChildren().addAll(
+                btnScheduleTab,
+                btnMyAppointmentsTab
+        );
+
+        return toolbar;
+    }
+
+    private void showScheduleTab() {
+
+        btnScheduleTab.setStyle(navButtonStyle(true));
+        btnMyAppointmentsTab.setStyle(navButtonStyle(false));
+        root.setCenter(createScheduleContent());
+        controller.initData();
+    }
+
+    public void showMyAppointmentsTab() {
+
+        btnScheduleTab.setStyle(navButtonStyle(false));
+        btnMyAppointmentsTab.setStyle(navButtonStyle(true));
+        root.setCenter(createMyAppointmentsContent());
+        controller.loadMyAppointments();
+    }
+
+    private Node createScheduleContent() {
 
         HBox mainContent = new HBox(20);
         mainContent.setAlignment(Pos.CENTER);
@@ -52,19 +121,71 @@ public class SelfServiceAppointmentFrame extends Application {
         scrollPane.setFitToWidth(true);
         scrollPane.setPannable(true);
         scrollPane.setStyle("-fx-background-color: #f4f6fb; -fx-background: #f4f6fb;");
-        root.setCenter(scrollPane);
 
-        Scene scene = new Scene(root, 1100, 650);
+        return scrollPane;
+    }
 
-        stage.setScene(scene);
+    private Node createMyAppointmentsContent() {
 
-        stage.setTitle(
-                "Autogestión de Citas - Servicios Médicos Piedrazul"
+        VBox wrapper = new VBox(18);
+        wrapper.setAlignment(Pos.TOP_CENTER);
+        wrapper.setPadding(new Insets(30));
+
+        VBox card = new VBox(18);
+        card.setMaxWidth(980);
+        card.setPadding(new Insets(28));
+        card.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-background-radius: 18;" +
+                        "-fx-border-radius: 18;" +
+                        "-fx-border-color: #d6e3f2;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 18, 0.20, 0, 5);"
         );
 
-        stage.show();
+        Label title = new Label("Mis citas");
+        title.setFont(Font.font("System", 28));
+        title.setStyle("-fx-text-fill: #163b5b; -fx-font-weight: bold;");
 
-        controller.initData();
+        lblMyAppointmentsFeedback = new Label(" ");
+        lblMyAppointmentsFeedback.setMinHeight(42);
+        lblMyAppointmentsFeedback.setWrapText(true);
+        lblMyAppointmentsFeedback.setStyle(
+                "-fx-text-fill: #5f7387;" +
+                        "-fx-background-color: #eef5fb;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-padding: 10;"
+        );
+
+        tblMyAppointments = createMyAppointmentsTable();
+
+        Button btnRefresh = new Button("Actualizar");
+        btnRefresh.setPrefHeight(44);
+        btnRefresh.setStyle(
+                "-fx-background-color: #1f6fb2;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;"
+        );
+        btnRefresh.setOnAction(e -> controller.loadMyAppointments());
+
+        HBox actions = new HBox(btnRefresh);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        card.getChildren().addAll(
+                title,
+                lblMyAppointmentsFeedback,
+                tblMyAppointments,
+                actions
+        );
+
+        wrapper.getChildren().add(card);
+
+        ScrollPane scrollPane = new ScrollPane(wrapper);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background: #f4f6fb; -fx-background-color: #f4f6fb;");
+
+        return scrollPane;
     }
 
     private Node createHeader() {
@@ -362,6 +483,125 @@ public class SelfServiceAppointmentFrame extends Application {
         );
 
         return helpBox;
+    }
+
+    private TableView<AppointmentDTO> createMyAppointmentsTable() {
+
+        TableView<AppointmentDTO> table = new TableView<>();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setPrefHeight(430);
+
+        TableColumn<AppointmentDTO, String> colProfessional =
+                new TableColumn<>("Profesional");
+        colProfessional.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getProfessional() == null
+                                ? ""
+                                : cell.getValue().getProfessional().getProfName()
+                )
+        );
+
+        TableColumn<AppointmentDTO, String> colDate =
+                new TableColumn<>("Fecha");
+        colDate.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getAppointmentDate() == null
+                                ? ""
+                                : cell.getValue().getAppointmentDate()
+                                .toLocalDate()
+                                .toString()
+                )
+        );
+
+        TableColumn<AppointmentDTO, String> colTime =
+                new TableColumn<>("Hora");
+        colTime.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getAppointmentDate() == null
+                                ? ""
+                                : cell.getValue().getAppointmentDate()
+                                .toLocalTime()
+                                .format(DateTimeFormatter.ofPattern("HH:mm"))
+                )
+        );
+
+        TableColumn<AppointmentDTO, String> colObservation =
+                new TableColumn<>("Motivo");
+        colObservation.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getObservation() == null
+                                ? ""
+                                : cell.getValue().getObservation()
+                )
+        );
+
+        table.getColumns().addAll(
+                colProfessional,
+                colDate,
+                colTime,
+                colObservation
+        );
+
+        return table;
+    }
+
+    public void setMyAppointments(
+            List<AppointmentDTO> appointments
+    ) {
+
+        tblMyAppointments.getItems().setAll(appointments);
+
+        if (appointments.isEmpty()) {
+
+            lblMyAppointmentsFeedback.setText(
+                    "No tiene citas agendadas."
+            );
+
+        } else {
+
+            lblMyAppointmentsFeedback.setText(
+                    "Citas agendadas: " + appointments.size()
+            );
+        }
+    }
+
+    public void showMyAppointmentsError(String message) {
+
+        lblMyAppointmentsFeedback.setStyle(
+                "-fx-text-fill: #9b1c1c;" +
+                        "-fx-background-color: #fdecec;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-padding: 10;"
+        );
+
+        lblMyAppointmentsFeedback.setText(message);
+    }
+
+    private Button createNavButton(
+            String text,
+            boolean active
+    ) {
+
+        Button button = new Button(text);
+        button.setFont(Font.font("System", 18));
+        button.setStyle(navButtonStyle(active));
+
+        return button;
+    }
+
+    private String navButtonStyle(boolean active) {
+
+        return active
+                ? "-fx-background-color: transparent;" +
+                "-fx-text-fill: #1f6fb2;" +
+                "-fx-border-color: transparent transparent #1f6fb2 transparent;" +
+                "-fx-border-width: 0 0 4 0;" +
+                "-fx-padding: 0 6 10 6;" +
+                "-fx-font-weight: bold;"
+                : "-fx-background-color: transparent;" +
+                "-fx-text-fill: #5f7387;" +
+                "-fx-padding: 0 6 10 6;" +
+                "-fx-font-weight: bold;";
     }
 
     public static void main(String[] args) {

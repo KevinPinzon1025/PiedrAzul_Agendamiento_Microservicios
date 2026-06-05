@@ -7,6 +7,7 @@ import co.unicauca.frontend.view.AdminAvailabilityFrame;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class AdminAvailabilityController {
@@ -84,6 +85,7 @@ public class AdminAvailabilityController {
             );
 
             clearForm();
+            loadConfiguredAvailability();
 
         } catch (Exception e) {
 
@@ -128,7 +130,7 @@ public class AdminAvailabilityController {
                         new WorkingDayDTO();
 
                 dto.setDayOfWeek(
-                        DayOfWeek.valueOf(day)
+                        parseDayOfWeek(day)
                 );
 
                 dto.setStartTime(
@@ -151,6 +153,116 @@ public class AdminAvailabilityController {
         });
 
         return list;
+    }
+
+    public void loadConfiguredAvailability() {
+
+        try {
+
+            List<WorkingDayDTO> workingDays =
+                    client.getConfiguredAvailability()
+                            .stream()
+                            .sorted(
+                                    Comparator
+                                            .comparing(
+                                                    WorkingDayDTO::getProfessionalName,
+                                                    Comparator.nullsLast(
+                                                            String::compareToIgnoreCase
+                                                    )
+                                            )
+                                            .thenComparing(
+                                                    WorkingDayDTO::getDayOfWeek,
+                                                    Comparator.nullsLast(
+                                                            Comparator.naturalOrder()
+                                                    )
+                                            )
+                                            .thenComparing(
+                                                    WorkingDayDTO::getStartTime,
+                                                    Comparator.nullsLast(
+                                                            Comparator.naturalOrder()
+                                                    )
+                                            )
+                            )
+                            .toList();
+
+            view.setConfiguredAvailability(workingDays);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            view.showConfiguredAvailabilityError(
+                    "No se pudieron cargar las franjas horarias."
+            );
+        }
+    }
+
+    public void updateDuration(
+            WorkingDayDTO workingDay,
+            Integer duration
+    ) {
+
+        try {
+
+            workingDay.setAppointmentDurationMinutes(duration);
+
+            client.updateAvailability(
+                    workingDay.getId(),
+                    workingDay
+            );
+
+            view.lblFeedback.setText(
+                    "Duración actualizada correctamente."
+            );
+
+            loadConfiguredAvailability();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            view.showConfiguredAvailabilityError(
+                    "No se pudo actualizar la duración."
+            );
+        }
+    }
+
+    public void deleteAvailability(WorkingDayDTO workingDay) {
+
+        try {
+
+            client.deleteAvailability(
+                    workingDay.getId()
+            );
+
+            view.lblFeedback.setText(
+                    "Franja horaria eliminada correctamente."
+            );
+
+            loadConfiguredAvailability();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            view.showConfiguredAvailabilityError(
+                    "No se pudo eliminar la franja horaria."
+            );
+        }
+    }
+
+    private DayOfWeek parseDayOfWeek(String value) {
+
+        return switch (value) {
+            case "Lunes" -> DayOfWeek.MONDAY;
+            case "Martes" -> DayOfWeek.TUESDAY;
+            case "Miércoles" -> DayOfWeek.WEDNESDAY;
+            case "Jueves" -> DayOfWeek.THURSDAY;
+            case "Viernes" -> DayOfWeek.FRIDAY;
+            case "Sábado" -> DayOfWeek.SATURDAY;
+            case "Domingo" -> DayOfWeek.SUNDAY;
+            default -> DayOfWeek.valueOf(value);
+        };
     }
 
     public void clearForm() {

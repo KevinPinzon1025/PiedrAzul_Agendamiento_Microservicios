@@ -14,6 +14,12 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class WorkingDayDTO {
 
+    private Long id;
+
+    private Long professionalId;
+
+    private String professionalName;
+
     private DayOfWeek dayOfWeek;
 
     private LocalTime startTime;
@@ -21,4 +27,16 @@ public class WorkingDayDTO {
     private LocalTime endTime;
 
     private Integer appointmentDurationMinutes;
+
+    public WorkingDayDTO(
+            DayOfWeek dayOfWeek,
+            LocalTime startTime,
+            LocalTime endTime,
+            Integer appointmentDurationMinutes
+    ) {
+        this.dayOfWeek = dayOfWeek;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.appointmentDurationMinutes = appointmentDurationMinutes;
+    }
 }

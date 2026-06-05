@@ -158,6 +158,38 @@ public class AppointmentHttpClient {
                 .getId();
     }
 
+    public List<AppointmentDTO> getAppointmentsByPatientId(Long patientId) {
+
+        try {
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/appointments"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+
+            List<AppointmentDTO> appointments =
+                    JsonUtil.fromJsonList(
+                            response.body(),
+                            AppointmentDTO.class
+                    );
+
+            return appointments.stream()
+                    .filter(appointment ->
+                            appointment.getPatient() != null &&
+                                    appointment.getPatient().getId() == patientId)
+                    .toList();
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
     public void createAppointment(CreateAppointmentRequestDTO request) {
 
         try {

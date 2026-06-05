@@ -198,6 +198,28 @@ public class AuthResponse {
         return "Usuario";
     }
 
+    public String getDocumentNumber() {
+        Object documentNumber = getClaim("documentNumber");
+        if (documentNumber != null && !documentNumber.toString().isBlank()) {
+            return documentNumber.toString().trim();
+        }
+
+        Object documentNumbers = getClaim("documentNumbers");
+        if (documentNumbers instanceof List<?> values && !values.isEmpty()) {
+            Object firstValue = values.get(0);
+            if (firstValue != null && !firstValue.toString().isBlank()) {
+                return firstValue.toString().trim();
+            }
+        }
+
+        String cleanedLogin = getLogin();
+        if (cleanedLogin != null && cleanedLogin.matches("\\d+")) {
+            return cleanedLogin;
+        }
+
+        return null;
+    }
+
     private Object getClaim(String claimName) {
         Map<String, Object> claims = getClaims();
         if (claims == null) {

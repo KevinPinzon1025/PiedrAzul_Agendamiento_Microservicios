@@ -8,6 +8,12 @@ import java.time.LocalTime;
 
 public class WorkingDayDTO {
 
+    private Long id;
+
+    private Long professionalId;
+
+    private String professionalName;
+
     private DayOfWeek dayOfWeek;
 
     private LocalTime startTime;
@@ -15,6 +21,30 @@ public class WorkingDayDTO {
     private LocalTime endTime;
 
     private Integer appointmentDurationMinutes;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getProfessionalId() {
+        return professionalId;
+    }
+
+    public void setProfessionalId(Long professionalId) {
+        this.professionalId = professionalId;
+    }
+
+    public String getProfessionalName() {
+        return professionalName;
+    }
+
+    public void setProfessionalName(String professionalName) {
+        this.professionalName = professionalName;
+    }
 
     public DayOfWeek getDayOfWeek() {
         return dayOfWeek;

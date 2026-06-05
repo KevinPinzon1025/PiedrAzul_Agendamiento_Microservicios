@@ -2,6 +2,9 @@
 package co.unicauca.frontend.controller;
 
 import co.unicauca.frontend.client.AppointmentHttpClient;
+import co.unicauca.frontend.dto.AppointmentDTO;
+import co.unicauca.frontend.dto.AuthResponse;
+import co.unicauca.frontend.dto.AuthSession;
 import co.unicauca.frontend.dto.CreateAppointmentRequestDTO;
 import co.unicauca.frontend.dto.SchedulingType;
 import javafx.scene.Node;
@@ -10,13 +13,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Comparator;
 
 import co.unicauca.frontend.view.SelfServiceAppointmentFrame;
 import javafx.scene.control.*;
 
 public class SelfServiceAppointmentController {
-
-    private static final Long TEMP_PATIENT_ID = 1L;
 
     private final SelfServiceAppointmentFrame view;
 
@@ -174,7 +176,7 @@ public class SelfServiceAppointmentController {
             CreateAppointmentRequestDTO request =
                     new CreateAppointmentRequestDTO();
 
-            request.setPatientId(TEMP_PATIENT_ID);
+            request.setPatientId(getCurrentPatientId());
 
             request.setProfessionalId(professionalId);
 
@@ -204,6 +206,8 @@ public class SelfServiceAppointmentController {
 
             clearForm();
 
+            view.showMyAppointmentsTab();
+
         } catch (Exception ex) {
 
             ex.printStackTrace();
@@ -216,6 +220,58 @@ public class SelfServiceAppointmentController {
                     "Error al registrar cita."
             );
         }
+    }
+
+    public void loadMyAppointments() {
+
+        try {
+
+            List<AppointmentDTO> appointments =
+                    httpClient.getAppointmentsByPatientId(
+                            getCurrentPatientId()
+                    )
+                            .stream()
+                            .sorted(
+                                    Comparator.comparing(
+                                            AppointmentDTO::getAppointmentDate,
+                                            Comparator.nullsLast(
+                                                    Comparator.naturalOrder()
+                                            )
+                                    )
+                            )
+                            .toList();
+
+            view.setMyAppointments(appointments);
+
+        } catch (Exception ex) {
+
+            ex.printStackTrace();
+
+            view.showMyAppointmentsError(
+                    "No se pudieron cargar sus citas."
+            );
+        }
+    }
+
+    private Long getCurrentPatientId() {
+
+        AuthResponse currentUser =
+                AuthSession.getCurrentUser();
+
+        String documentNumber =
+                currentUser == null
+                        ? null
+                        : currentUser.getDocumentNumber();
+
+        if (documentNumber == null ||
+                !documentNumber.matches("\\d+")) {
+
+            throw new IllegalStateException(
+                    "No se pudo identificar el paciente autenticado."
+            );
+        }
+
+        return Long.parseLong(documentNumber);
     }
 
     private boolean validateFields() {

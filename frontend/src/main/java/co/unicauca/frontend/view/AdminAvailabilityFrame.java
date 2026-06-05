@@ -3,6 +3,8 @@ package co.unicauca.frontend.view;
 import co.unicauca.frontend.controller.AdminAvailabilityController;
 import co.unicauca.frontend.dto.AuthResponse;
 import co.unicauca.frontend.dto.AuthSession;
+import co.unicauca.frontend.dto.WorkingDayDTO;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,6 +17,8 @@ import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.time.DayOfWeek;
 
 public class AdminAvailabilityFrame extends Application {
 
@@ -26,6 +30,10 @@ public class AdminAvailabilityFrame extends Application {
     public VBox containerRows;
 
     public Label lblFeedback;
+
+    public Label lblConfiguredAvailabilityFeedback;
+
+    public TableView<WorkingDayDTO> tblConfiguredAvailability;
 
     public List<RowData> rows =
             new ArrayList<>();
@@ -225,7 +233,42 @@ public class AdminAvailabilityFrame extends Application {
                         "-fx-background-color: #eef5fb;"
         );
 
-        root.setCenter(scroll);
+        Tab tabConfigure =
+                new Tab(
+                        "Configurar disponibilidad",
+                        scroll
+                );
+
+        tabConfigure.setClosable(false);
+
+        Tab tabList =
+                new Tab(
+                        "Ver franjas horarias",
+                        createAvailabilityListContent()
+                );
+
+        tabList.setClosable(false);
+
+        TabPane tabs =
+                new TabPane(
+                        tabConfigure,
+                        tabList
+                );
+
+        tabs.setStyle(
+                "-fx-background-color: #eef5fb;" +
+                        "-fx-font-size: 16px;"
+        );
+
+        tabList.setOnSelectionChanged(e -> {
+
+            if (tabList.isSelected()) {
+
+                controller.loadConfiguredAvailability();
+            }
+        });
+
+        root.setCenter(tabs);
 
         Scene scene =
                 new Scene(root, 1200, 800);
@@ -241,6 +284,246 @@ public class AdminAvailabilityFrame extends Application {
         addRow();
 
         controller.initData();
+        controller.loadConfiguredAvailability();
+    }
+
+    private ScrollPane createAvailabilityListContent() {
+
+        VBox wrapper =
+                new VBox(20);
+
+        wrapper.setPadding(
+                new Insets(30)
+        );
+
+        wrapper.setAlignment(Pos.TOP_CENTER);
+
+        VBox card =
+                new VBox(18);
+
+        card.setMaxWidth(1080);
+
+        card.setPadding(
+                new Insets(28)
+        );
+
+        card.setStyle(
+                "-fx-background-color: white;" +
+                        "-fx-background-radius: 22;" +
+                        "-fx-border-radius: 22;" +
+                        "-fx-border-color: #d6e3f2;"
+        );
+
+        Label title =
+                new Label("Franjas horarias configuradas");
+
+        title.setFont(
+                Font.font(
+                        "System",
+                        FontWeight.BOLD,
+                        30
+                )
+        );
+
+        title.setStyle(
+                "-fx-text-fill: #163b5b;"
+        );
+
+        lblConfiguredAvailabilityFeedback =
+                new Label(" ");
+
+        lblConfiguredAvailabilityFeedback.setMinHeight(46);
+
+        lblConfiguredAvailabilityFeedback.setWrapText(true);
+
+        lblConfiguredAvailabilityFeedback.setStyle(
+                "-fx-background-color: #eef5fb;" +
+                        "-fx-text-fill: #5f7387;" +
+                        "-fx-padding: 12;" +
+                        "-fx-background-radius: 12;"
+        );
+
+        tblConfiguredAvailability =
+                createAvailabilityTable();
+
+        Button btnRefresh =
+                new Button("Actualizar");
+
+        btnRefresh.setPrefHeight(46);
+
+        btnRefresh.setStyle(
+                "-fx-background-color: #1f6fb2;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        btnRefresh.setOnAction(
+                e -> controller.loadConfiguredAvailability()
+        );
+
+        HBox actions =
+                new HBox(btnRefresh);
+
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        card.getChildren().addAll(
+                title,
+                lblConfiguredAvailabilityFeedback,
+                tblConfiguredAvailability,
+                actions
+        );
+
+        wrapper.getChildren().add(card);
+
+        ScrollPane scrollPane =
+                new ScrollPane(wrapper);
+
+        scrollPane.setFitToWidth(true);
+
+        scrollPane.setStyle(
+                "-fx-background: #eef5fb;" +
+                        "-fx-background-color: #eef5fb;"
+        );
+
+        return scrollPane;
+    }
+
+    private TableView<WorkingDayDTO> createAvailabilityTable() {
+
+        TableView<WorkingDayDTO> table =
+                new TableView<>();
+
+        table.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY
+        );
+
+        table.setPrefHeight(470);
+
+        TableColumn<WorkingDayDTO, String> colProfessional =
+                new TableColumn<>("Profesional");
+
+        colProfessional.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getProfessionalName() == null
+                                ? ""
+                                : cell.getValue().getProfessionalName()
+                )
+        );
+
+        TableColumn<WorkingDayDTO, String> colDay =
+                new TableColumn<>("Día");
+
+        colDay.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        toSpanishDay(
+                                cell.getValue().getDayOfWeek()
+                        )
+                )
+        );
+
+        TableColumn<WorkingDayDTO, String> colStart =
+                new TableColumn<>("Hora inicio");
+
+        colStart.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getStartTime() == null
+                                ? ""
+                                : cell.getValue().getStartTime().toString()
+                )
+        );
+
+        TableColumn<WorkingDayDTO, String> colEnd =
+                new TableColumn<>("Hora fin");
+
+        colEnd.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue().getEndTime() == null
+                                ? ""
+                                : cell.getValue().getEndTime().toString()
+                )
+        );
+
+        TableColumn<WorkingDayDTO, String> colDuration =
+                new TableColumn<>("Duración");
+
+        colDuration.setCellValueFactory(cell ->
+                new SimpleStringProperty(
+                        cell.getValue()
+                                .getAppointmentDurationMinutes()
+                                + " min"
+                )
+        );
+
+        TableColumn<WorkingDayDTO, Void> colActions =
+                new TableColumn<>("Acciones");
+
+        colActions.setCellFactory(column ->
+                new TableCell<>() {
+
+                    private final Button btnEdit =
+                            createTableButton(
+                                    "Editar",
+                                    "#1f6fb2"
+                            );
+
+                    private final Button btnDelete =
+                            createTableButton(
+                                    "Eliminar",
+                                    "#d9534f"
+                            );
+
+                    private final HBox box =
+                            new HBox(
+                                    8,
+                                    btnEdit,
+                                    btnDelete
+                            );
+
+                    {
+                        box.setAlignment(Pos.CENTER);
+
+                        btnEdit.setOnAction(e ->
+                                editDuration(
+                                        getTableView()
+                                                .getItems()
+                                                .get(getIndex())
+                                )
+                        );
+
+                        btnDelete.setOnAction(e ->
+                                confirmDelete(
+                                        getTableView()
+                                                .getItems()
+                                                .get(getIndex())
+                                )
+                        );
+                    }
+
+                    @Override
+                    protected void updateItem(
+                            Void item,
+                            boolean empty
+                    ) {
+
+                        super.updateItem(item, empty);
+
+                        setGraphic(empty ? null : box);
+                    }
+                }
+        );
+
+        table.getColumns().addAll(
+                colProfessional,
+                colDay,
+                colStart,
+                colEnd,
+                colDuration,
+                colActions
+        );
+
+        return table;
     }
 
     private HBox createHeader() {
@@ -385,13 +668,13 @@ public class AdminAvailabilityFrame extends Application {
                 new ComboBox<>();
 
         row.cbDay.getItems().addAll(
-                "MONDAY",
-                "TUESDAY",
-                "WEDNESDAY",
-                "THURSDAY",
-                "FRIDAY",
-                "SATURDAY",
-                "SUNDAY"
+                "Lunes",
+                "Martes",
+                "Miércoles",
+                "Jueves",
+                "Viernes",
+                "Sábado",
+                "Domingo"
         );
 
         row.cbDay.setPromptText("Día");
@@ -408,6 +691,7 @@ public class AdminAvailabilityFrame extends Application {
                 new ComboBox<>();
 
         row.cbDuration.getItems().addAll(
+                "10",
                 "15",
                 "20",
                 "30",
@@ -552,6 +836,137 @@ public class AdminAvailabilityFrame extends Application {
                         "-fx-background-radius: 12;" +
                         "-fx-font-size: 16px;"
         );
+    }
+
+    private Button createTableButton(
+            String text,
+            String color
+    ) {
+
+        Button button =
+                new Button(text);
+
+        button.setPrefHeight(34);
+
+        button.setStyle(
+                "-fx-background-color: " + color + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-font-weight: bold;"
+        );
+
+        return button;
+    }
+
+    private void editDuration(
+            WorkingDayDTO workingDay
+    ) {
+
+        ChoiceDialog<String> dialog =
+                new ChoiceDialog<>(
+                        String.valueOf(
+                                workingDay
+                                        .getAppointmentDurationMinutes()
+                        ),
+                        "10",
+                        "15",
+                        "20",
+                        "30",
+                        "45",
+                        "60"
+                );
+
+        dialog.setTitle("Editar duración");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Duración de la cita en minutos:");
+
+        Optional<String> result =
+                dialog.showAndWait();
+
+        result.ifPresent(value ->
+                controller.updateDuration(
+                        workingDay,
+                        Integer.parseInt(value)
+                )
+        );
+    }
+
+    private void confirmDelete(
+            WorkingDayDTO workingDay
+    ) {
+
+        Alert alert =
+                new Alert(Alert.AlertType.CONFIRMATION);
+
+        alert.setTitle("Eliminar franja");
+        alert.setHeaderText(null);
+        alert.setContentText(
+                "¿Desea eliminar esta franja horaria?"
+        );
+
+        Optional<ButtonType> result =
+                alert.showAndWait();
+
+        if (result.isPresent() &&
+                result.get() == ButtonType.OK) {
+
+            controller.deleteAvailability(workingDay);
+        }
+    }
+
+    public void setConfiguredAvailability(
+            List<WorkingDayDTO> workingDays
+    ) {
+
+        tblConfiguredAvailability.getItems()
+                .setAll(workingDays);
+
+        lblConfiguredAvailabilityFeedback.setStyle(
+                "-fx-background-color: #eef5fb;" +
+                        "-fx-text-fill: #5f7387;" +
+                        "-fx-padding: 12;" +
+                        "-fx-background-radius: 12;"
+        );
+
+        lblConfiguredAvailabilityFeedback.setText(
+                workingDays.isEmpty()
+                        ? "No hay franjas horarias configuradas."
+                        : "Franjas configuradas: " + workingDays.size()
+        );
+    }
+
+    public void showConfiguredAvailabilityError(
+            String message
+    ) {
+
+        lblConfiguredAvailabilityFeedback.setStyle(
+                "-fx-background-color: #fdecec;" +
+                        "-fx-text-fill: #9b1c1c;" +
+                        "-fx-padding: 12;" +
+                        "-fx-background-radius: 12;"
+        );
+
+        lblConfiguredAvailabilityFeedback.setText(message);
+    }
+
+    private String toSpanishDay(
+            DayOfWeek day
+    ) {
+
+        if (day == null) {
+
+            return "";
+        }
+
+        return switch (day) {
+            case MONDAY -> "Lunes";
+            case TUESDAY -> "Martes";
+            case WEDNESDAY -> "Miércoles";
+            case THURSDAY -> "Jueves";
+            case FRIDAY -> "Viernes";
+            case SATURDAY -> "Sábado";
+            case SUNDAY -> "Domingo";
+        };
     }
 
     public static class RowData {
