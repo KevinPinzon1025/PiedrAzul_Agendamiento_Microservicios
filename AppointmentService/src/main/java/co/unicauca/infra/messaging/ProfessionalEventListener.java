@@ -34,6 +34,7 @@ public class ProfessionalEventListener {
     @Transactional
     @RabbitListener(queues = "professional.updated.queue")
     public void handleProfessionalUpdated(ProfessionalDTO professional) {
+        System.out.println("Profesional actualizado recibido: " + professional);
         professionalRepository.findById(professional.getId()).ifPresent(existing -> {
             existing.setProfName(professional.getProfName());
             professionalRepository.save(existing);

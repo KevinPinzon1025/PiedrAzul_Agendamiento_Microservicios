@@ -17,7 +17,7 @@ services:
     image: rabbitmq:3.13-management
     container_name: piedrazul-rabbitmq
     ports:
-      - "5672:5672"
+      - "5673:5672"
       - "15672:15672"
     networks:
       - piedrazul-net
@@ -75,6 +75,20 @@ services:
       - "5435:5432"
     volumes:
       - report-db-data:/var/lib/postgresql/data
+    networks:
+      - piedrazul-net
+
+  professional-db:
+    image: postgres:16-alpine
+    container_name: piedrazul-professional-db
+    environment:
+      POSTGRES_DB: professional_db
+      POSTGRES_USER: professional_user
+      POSTGRES_PASSWORD: professional_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - professional-db-data:/var/lib/postgresql/data
     networks:
       - piedrazul-net
 
@@ -178,8 +192,18 @@ services:
     container_name: piedrazul-professional-service
     environment:
       SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:postgresql://professional-db:5432/professional_db
+      SPRING_DATASOURCE_USERNAME: professional_user
+      SPRING_DATASOURCE_PASSWORD: professional_pass
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
     ports:
       - "8085:8085"
+    depends_on:
+      - professional-db
+      - rabbitmq
     networks:
       - piedrazul-net
 
@@ -212,6 +236,7 @@ volumes:
   appointment-db-data:
   patient-db-data:
   report-db-data:
+  professional-db-data:
   report-files:
 
 networks:
