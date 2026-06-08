@@ -4,7 +4,6 @@ import co.unicauca.domain.model.Professional;
 import co.unicauca.domain.model.WorkingDay;
 import co.unicauca.domain.valueobject.AvailableSlot;
 import co.unicauca.domain.valueobject.SchedulingWindow;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-@Component
 public class AvailableSlotsGenerator {
     public List<AvailableSlot> generateForDate(Professional professional,
                                                LocalDate date,

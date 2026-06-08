@@ -6,8 +6,8 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = "co.unicauca")
-@EnableJpaRepositories(basePackages = "co.unicauca.adapter.out.persistence")
-@EntityScan(basePackages = "co.unicauca.adapter.out.persistence")
+@EnableJpaRepositories(basePackages = "co.unicauca.adapter.out.db.repository")
+@EntityScan(basePackages = "co.unicauca.adapter.out.db.model")
 public class ProfessionalServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(ProfessionalServiceApplication.class, args);

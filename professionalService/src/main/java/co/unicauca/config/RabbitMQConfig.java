@@ -15,6 +15,8 @@ public class RabbitMQConfig {
     public static final String PROFESSIONAL_EXCHANGE = "piedrAzul.professional.exchange";
     public static final String PROFESSIONAL_CREATED_KEY = "professional.created";
     public static final String PROFESSIONAL_UPDATED_KEY = "professional.updated";
+    public static final String PROFESSIONAL_AVAILABILITY_CONFIGURED_KEY =
+            "professional.availability.configured";
 
     @Bean
     public TopicExchange professionalExchange() {

@@ -8,14 +8,10 @@ import co.unicauca.domain.model.SchedulingConfiguration;
 import co.unicauca.domain.model.WorkingDay;
 import co.unicauca.domain.service.AvailableSlotsGenerator;
 import co.unicauca.domain.valueobject.*;
-import co.unicauca.port.in.AvailabilityManagementPort;
-import co.unicauca.port.in.HolidayManagementPort;
-import co.unicauca.port.in.ProfessionalManagementPort;
-import co.unicauca.port.in.SchedulingConfigurationPort;
-import co.unicauca.port.out.HolidayRepositoryPort;
-import co.unicauca.port.out.ProfessionalRepositoryPort;
-import co.unicauca.port.out.ProfessionalEventPublisherPort;
-import co.unicauca.port.out.SchedulingConfigurationRepositoryPort;
+import co.unicauca.port.out.db.HolidayDbPort;
+import co.unicauca.port.out.db.ProfessionalDbPort;
+import co.unicauca.port.out.db.SchedulingConfigurationDbPort;
+import co.unicauca.port.out.notification.ProfessionalNotificationPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,42 +21,36 @@ import java.util.Set;
 
 @Service
 @Transactional
-public class ProfessionalApplicationService implements ProfessionalManagementPort,
-        AvailabilityManagementPort,
-        SchedulingConfigurationPort,
-        HolidayManagementPort {
+public class ProfessionalApplicationService {
 
-    private final ProfessionalRepositoryPort professionalRepository;
-    private final ProfessionalEventPublisherPort eventPublisher;
-    private final SchedulingConfigurationRepositoryPort configurationRepository;
-    private final HolidayRepositoryPort holidayRepository;
+    private final ProfessionalDbPort professionalRepository;
+    private final ProfessionalNotificationPort notificationPort;
+    private final SchedulingConfigurationDbPort configurationRepository;
+    private final HolidayDbPort holidayRepository;
     private final AvailableSlotsGenerator slotsGenerator;
 
-    public ProfessionalApplicationService(ProfessionalRepositoryPort professionalRepository,
-                                          ProfessionalEventPublisherPort eventPublisher,
-                                          SchedulingConfigurationRepositoryPort configurationRepository,
-                                          HolidayRepositoryPort holidayRepository,
+    public ProfessionalApplicationService(ProfessionalDbPort professionalRepository,
+                                          ProfessionalNotificationPort notificationPort,
+                                          SchedulingConfigurationDbPort configurationRepository,
+                                          HolidayDbPort holidayRepository,
                                           AvailableSlotsGenerator slotsGenerator) {
         this.professionalRepository = professionalRepository;
-        this.eventPublisher = eventPublisher;
+        this.notificationPort = notificationPort;
         this.configurationRepository = configurationRepository;
         this.holidayRepository = holidayRepository;
         this.slotsGenerator = slotsGenerator;
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<ProfessionalResponse> findAll() {
         return professionalRepository.findAll().stream().map(this::toProfessionalResponse).toList();
     }
 
-    @Override
     @Transactional(readOnly = true)
     public ProfessionalResponse findById(Long id) {
         return toProfessionalResponse(getProfessional(id));
     }
 
-    @Override
     public ProfessionalResponse create(ProfessionalRequest request) {
         Professional professional = Professional.createNew(
                 new ProfessionalName(request.name()),
@@ -68,11 +58,10 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
                 ProfessionalType.from(request.type())
         );
         Professional saved = professionalRepository.save(professional);
-        eventPublisher.publishProfessionalCreated(saved);
+        notificationPort.publishProfessionalCreated(saved);
         return toProfessionalResponse(saved);
     }
 
-    @Override
     public ProfessionalResponse update(Long id, ProfessionalRequest request) {
         Professional professional = getProfessional(id);
         professional.updateBasicInformation(
@@ -81,11 +70,10 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
                 ProfessionalType.from(request.type())
         );
         Professional saved = professionalRepository.save(professional);
-        eventPublisher.publishProfessionalUpdated(saved);
+        notificationPort.publishProfessionalUpdated(saved);
         return toProfessionalResponse(saved);
     }
 
-    @Override
     public void delete(Long id) {
         ProfessionalId professionalId = new ProfessionalId(id);
         if (!professionalRepository.existsById(professionalId)) {
@@ -94,27 +82,30 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
         professionalRepository.deleteById(professionalId);
     }
 
-    @Override
     public AvailabilityResponse configureAvailability(Long professionalId, List<WorkingDayRequest> workingDays) {
         Professional professional = getProfessional(professionalId);
         professional.configureAvailability(toDomainWorkingDays(workingDays));
         Professional saved = professionalRepository.save(professional);
+        notificationPort.publishProfessionalAvailabilityConfigured(saved);
         return toAvailabilityResponse(saved);
     }
 
-    @Override
     @Transactional(readOnly = true)
     public AvailabilityResponse getAvailability(Long professionalId) {
         return toAvailabilityResponse(getProfessional(professionalId));
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<SlotResponse> getAvailableSlots(Long professionalId, LocalDate date) {
         Professional professional = getProfessional(professionalId);
         SchedulingConfiguration config = configurationRepository.getConfiguration();
         LocalDate today = LocalDate.now();
-        Set<LocalDate> holidays = holidayRepository.findDatesBetween(today, today.plusWeeks(config.getAutonomousSchedulingWindow().weeks()));
+        Set<LocalDate> holidays = Set.copyOf(
+                holidayRepository.findDatesBetween(
+                        today,
+                        today.plusWeeks(config.getAutonomousSchedulingWindow().weeks())
+                )
+        );
         return slotsGenerator.generateForDate(
                 professional,
                 date,
@@ -124,14 +115,12 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
         ).stream().map(slot -> new SlotResponse(slot.date(), slot.startTime(), slot.endTime(), slot.available())).toList();
     }
 
-    @Override
     @Transactional(readOnly = true)
     public SchedulingConfigurationResponse getConfiguration() {
         SchedulingConfiguration config = configurationRepository.getConfiguration();
         return new SchedulingConfigurationResponse(config.getAutonomousSchedulingWindow().weeks());
     }
 
-    @Override
     public SchedulingConfigurationResponse updateConfiguration(SchedulingConfigurationRequest request) {
         SchedulingConfiguration saved = configurationRepository.save(
                 new SchedulingConfiguration(1L, new SchedulingWindow(request.autonomousSchedulingWindowWeeks()))
@@ -139,7 +128,6 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
         return new SchedulingConfigurationResponse(saved.getAutonomousSchedulingWindow().weeks());
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<HolidayResponse> findAllHolidays() {
         return holidayRepository.findAll().stream()
@@ -147,14 +135,12 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
                 .toList();
     }
 
-    @Override
-    public HolidayResponse create(HolidayRequest request) {
+    public HolidayResponse createHoliday(HolidayRequest request) {
         Holiday saved = holidayRepository.save(new Holiday(request.date(), request.name()));
         return new HolidayResponse(saved.getDate(), saved.getName());
     }
 
-    @Override
-    public void delete(LocalDate date) {
+    public void deleteHoliday(LocalDate date) {
         holidayRepository.deleteByDate(date);
     }
 
@@ -198,3 +184,4 @@ public class ProfessionalApplicationService implements ProfessionalManagementPor
         return new AvailabilityResponse(professional.getId().value(), workingDays);
     }
 }
+
